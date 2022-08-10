@@ -34,14 +34,13 @@ class SurvosProvidenceBundle extends AbstractBundle
         $container->services()->alias(ProvidenceService::class, $providence_service_id);
 
         $profile_service_id = 'survos.profile_service';
-        $builder
+        $container->services()->alias(ProfileService::class, $profile_service_id);
+        $definition = $builder
             ->autowire($profile_service_id, ProfileService::class)
             ->setPublic(true)
         ;
-        $container->services()->alias(ProfileService::class, $profile_service_id);
-
-
-//        $definition->setArgument('$widthFactor', $config['widthFactor']);
+        $definition->setArgument('$xmlDir', $config['xml_dir']);
+        $definition->setArgument('$loadFromFiles', $config['load_from_files']);
 //        $definition->setArgument('$height', $config['height']);
 //        $definition->setArgument('$foregroundColor', $config['foregroundColor']);
     }
@@ -52,17 +51,8 @@ class SurvosProvidenceBundle extends AbstractBundle
         $definition->rootNode()
             ->children()
 //            ->arrayNode('routes_to_skip')->defaultValue(['app_logout'])->end()
-            ->scalarNode('max_per_route')->defaultValue(3)->end()
-            ->scalarNode('base_url')->defaultValue('https://127.0.0.1:8000')->end()
-            ->scalarNode('initial_path')->defaultValue('/')->end()
-            ->scalarNode('user')->defaultValue('juan@tt.com')->end()
-            ->scalarNode('login_path')->defaultValue('/login')->end()
-            ->scalarNode('username_form_variable')->defaultValue('_username')->end()
-            ->scalarNode('password_form_variable')->defaultValue('_password')->end()
-            ->scalarNode('plaintext_password')->defaultValue('password')->end()
-            ->scalarNode('submit_button')->defaultValue('.btn')->end()
-            ->scalarNode('user_class')->defaultValue('Survos\Providence\\Entity\\User')->end()
-
+            ->scalarNode('xml_dir')->defaultValue("vendor/collectiveaccess/install/xml")->end()
+            ->booleanNode('load_from_files')->defaultValue(true)->end()
             ->end();
         ;
     }

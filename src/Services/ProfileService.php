@@ -3,7 +3,7 @@
 namespace Survos\Providence\Services;
 
 use Survos\Providence\Entity\Obj;
-use Survos\Providence\Entity\Profile as EntityProfile;
+//use Survos\Providence\Entity\Profile as EntityProfile;
 
 use Survos\Providence\Model\Field;
 use Survos\Providence\Model\StorageLocation;
@@ -193,13 +193,18 @@ class ProfileService
     }
 
     public function __construct(
+        private string $xmlDir,
+        private bool $loadFromFiles,
         private readonly ValidatorInterface $validator,
-        private readonly ParameterBagInterface $bag, private readonly LoggerInterface $logger, private readonly Environment $twig, private readonly EntityManagerInterface $entityManager)
+        private readonly ParameterBagInterface $bag,
+        private readonly LoggerInterface $logger,
+        private readonly Environment $twig,
+        private readonly EntityManagerInterface $entityManager)
     {
         $this->coreTypes = new ArrayCollection();
 
         $this->relationshipTables = [];
-        if ($this->bag->get('internal_name') === 'profiles') {
+        if ($this->loadFromFiles) {
             $this->setup(true);
         }
     }
@@ -1224,6 +1229,11 @@ END;
 
         return $coreComponents;
 //        dd('const CORE_TABLES=[' . join(',', array_map(fn($key) => "'$key'", array_keys($coreComponents)))) . ']';
+    }
+
+    public function getProfileFiles()
+    {
+
     }
 
     public function loadXml($filename = null, $updateDatabase = false): ?array

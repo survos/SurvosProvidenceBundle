@@ -549,4 +549,10 @@ class Core
     {
         return u($this->getIdentityFieldName())->snake();
     }
+
+    public function getrp() {
+        return ['coreId' => $this->getCaTable()];
+    }
+
+
 }

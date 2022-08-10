@@ -43,5 +43,11 @@ trait XmlAttributesTrait
         return $this->code;
     }
 
+    // can't do this, because it's in XmlLabelTrait
+//    public function getCode(): string
+//    {
+//        return $this->code;
+//    }
+
 
 }

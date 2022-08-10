@@ -50,7 +50,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 #[ORM\UniqueConstraint(name: 'storageLocations_project_plus_code', columns: ['project_id', 'code'])]
 #[UniqueEntity(fields: ['project', 'code'])]
 #[ApiFilter(filterClass: SearchFilter::class, properties: ['id' => 'exact', 'project' => 'exact'])]
-class StorageLocation extends CoreEntity implements UuidInterface, ProjectInterface, ListItemInterface, Translatable, ImportDataInterface, InstanceInterface, UuidAttributeInterface
+class StorageLocation extends CoreModel implements UuidInterface, ProjectInterface, ListItemInterface, Translatable, ImportDataInterface, InstanceInterface, UuidAttributeInterface
 {
     use UuidTrait, UuidAttributeTrait, CollectiveAccessTrait, NestedEntityTrait, LabelTrait, ProjectCoreTrait, ImportDataTrait, ProjectTrait, InstanceTrait;
     final const CA_TABLE_NAME = 'ca_storage_locations';
