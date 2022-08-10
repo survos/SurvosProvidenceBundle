@@ -9,7 +9,6 @@ class ProfileRelationshipTable
 
     /** @var ProfileRelationshipTableType */
     public ProfileRelationshipTableTypes $types;
-    public $code;
     public $name;
 
     public function __toString() {

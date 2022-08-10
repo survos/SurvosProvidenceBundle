@@ -3,6 +3,7 @@
 namespace Survos\Providence;
 
 use Survos\Providence\Command\ExportCommand;
+use Survos\Providence\Services\ProfileService;
 use Survos\Providence\Services\ProvidenceService;
 use Survos\Providence\Twig\TwigExtension;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
@@ -29,15 +30,15 @@ class SurvosProvidenceBundle extends AbstractBundle
         $builder
             ->autowire($providence_service_id, ProvidenceService::class)
             ->setPublic(true)
-            ->setArgument('$userClass', $config['user_class'])
-            ->setArgument('$loginPath', $config['login_path'])
-            ->setArgument('$submitButtonSelector', $config['submit_button'])
-            ->setArgument('$plaintextPassword', $config['plaintext_password'])
-            ->setArgument('$initialPath', $config['initial_path'])
-            ->setArgument('$baseUrl', $config['base_url']);
             ;
         $container->services()->alias(ProvidenceService::class, $providence_service_id);
 
+        $profile_service_id = 'survos.profile_service';
+        $builder
+            ->autowire($profile_service_id, ProfileService::class)
+            ->setPublic(true)
+        ;
+        $container->services()->alias(ProfileService::class, $profile_service_id);
 
 
 //        $definition->setArgument('$widthFactor', $config['widthFactor']);

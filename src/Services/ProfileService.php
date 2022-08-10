@@ -1,17 +1,21 @@
 <?php
 
-namespace App\Services;
+namespace Survos\Providence\Services;
 
-use Survos\Providence\Entity\Core;
-use Survos\Providence\Entity\Field;
-use Survos\Providence\Entity\FieldDisplayType;
-use Survos\Providence\Entity\FieldType;
 use Survos\Providence\Entity\Obj;
 use Survos\Providence\Entity\Profile as EntityProfile;
-use Survos\Providence\Entity\StorageLocation;
-use Survos\Providence\Entity\SystemList;
+
+use Survos\Providence\Model\Field;
+use Survos\Providence\Model\StorageLocation;
 use Survos\Providence\Model\CaTable;
-use Survos\Providence\XmlModel\Profile;
+
+
+use Survos\Providence\Model\Core;
+use Survos\Providence\Model\FieldDisplayType;
+use Survos\Providence\Model\SystemList;
+use Survos\Providence\Model\FieldType;
+
+use Survos\Providence\XmlModel\XmlProfile;
 use Survos\Providence\XmlModel\ProfileItem;
 use Survos\Providence\XmlModel\ProfileItems;
 use Survos\Providence\XmlModel\ProfileLabel;
@@ -314,8 +318,8 @@ XML_WRAP;
         //dd($input);
         $service = new XmlParser();
         $service->namespaceMap['http://www.w3.org/2001/XMLSchema-instance'] = 'profile';
-        $service->mapValueObject('{}profile', Profile::class);
-        /** @var Profile $profile */
+        $service->mapValueObject('{}profile', XmlProfile::class);
+        /** @var XmlProfile $profile */
         $profile = $service->parse($input);
 //        dd($profile->elementSets->metadataElement[0]->typeRestrictions->restriction[0]->settings->setting[0]);
         return $profile;
@@ -905,7 +909,7 @@ XML_WRAP;
                 $errors = $this->validator->validate($relatedEntity);
                 assert($errors->count() == 0, "Invalid entity " . $value);
 
-                $this->entityManager->persist($relatedEntity);
+//                $this->entityManager->persist($relatedEntity); @todo: move to callback or complete out of this bundle
                 $related[$prefix][$idx]  = $relatedEntity;
             }
         }
@@ -1907,7 +1911,7 @@ END;
         return $x;
     }
 
-    public function loadLabelsFromXml(Profile $profile)
+    public function loadLabelsFromXml(XmlProfile $profile)
     {
         $localMap = ['en' => 'en_US', 'fr' => 'fr_FR'];
         $locale = 'en_US'; // @todo: get from xml

@@ -9,7 +9,7 @@ class ProfileRelationshipTypes
     /** @var ProfileRelationshipTable[] */
     public $relationshipTable = [];
 
-    public $code;
+
 
 //    /** @return ProfileRelationshipTableType[] */
 //    public function getTypes(): array

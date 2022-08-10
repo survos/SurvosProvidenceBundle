@@ -8,7 +8,7 @@ class ProfileRelationshipTableType
     use XmlAttributesTrait;
     use XmlLabelsTrait;
 
-    public $code;
+
     public $default;
     public $subTypeLeft;
     public $subTypeRight;

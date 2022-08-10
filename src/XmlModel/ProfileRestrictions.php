@@ -9,7 +9,6 @@ class ProfileRestrictions
 
     public string $table;
     public ProfileSettings $settings;
-    public ?string $code=null;
 //    public $type;
 //
 //    public $includeSubtypes;

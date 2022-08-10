@@ -7,7 +7,6 @@ class ProfileList
     use XmlAttributesTrait;
     use XmlLabelsTrait;
 
-    public $code;
     public $hierarchical;
     public $system;
     public $vocabulary;

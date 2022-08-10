@@ -10,7 +10,6 @@ class ProfileUserInterface
     use XmlAttributesTrait;
     use XmlLabelsTrait;
 
-    public $code;
     public $type;
 
     public ProfileScreens $screens;

@@ -2,7 +2,7 @@
 
 namespace Survos\Providence\XmlModel;
 
-class Profile
+class XmlProfile
 {
     use XmlAttributesTrait;
 
