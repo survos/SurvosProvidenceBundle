@@ -9,6 +9,8 @@ use Survos\Providence\XmlModel\ProfileDisplay;
 use Survos\Providence\XmlModel\ProfileDisplays;
 use Survos\Providence\XmlModel\ProfileElements;
 use Survos\Providence\XmlModel\ProfileElementSets;
+use Survos\Providence\XmlModel\ProfileLocale;
+use Survos\Providence\XmlModel\ProfileLocales;
 use Survos\Providence\XmlModel\XmlProfile;
 use Survos\Providence\XmlModel\ProfileGroupAccess;
 use Survos\Providence\XmlModel\ProfileItem;
@@ -66,6 +68,9 @@ class XmlParser extends \Sabre\Xml\Service
 
         $this->mapValueObject($ca . 'lists', ProfileLists::class);
         $this->mapValueObject($ca . 'list', ProfileList::class);
+
+        $this->mapValueObject($ca . 'locales', ProfileLocales::class);
+        $this->mapValueObject($ca . 'locale', ProfileLocale::class);
 
         $this->mapValueObject($ca . 'labels', ProfileLabels::class);
         $this->mapValueObject($ca . 'label', ProfileLabel::class);

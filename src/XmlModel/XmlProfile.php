@@ -7,10 +7,11 @@ class XmlProfile
     use XmlAttributesTrait;
 
     public $profileName;
-    public string $profileId = '~';
+    private string $profileId;
+
     public $profileDescription;
     public ProfileLists $lists;
-    public $locales = [];
+    public ProfileLocales $locales;
     public $useForConfiguration;
     public $infoUrl;
     public $base;
@@ -167,8 +168,8 @@ class XmlProfile
         return $summary;
     }
 
-//    /** @returns ProfileElementSets[] */
-//    public function getElementSets(): array { return $this->elementSets ? $this->elementSets: []; }
+    /** @returns ProfileElementSets[] */
+    public function getElementSets(): array { return $this->elementSets ? $this->elementSets->metadataElement: []; }
 
 //<relationshipTypes>
 //<relationshipTable name="ca_objects_x_entities">
@@ -233,8 +234,29 @@ class XmlProfile
 
     public function getRp(array $attr = []): array
     {
-        return array_merge($attr, ['profileId' => $this->profileName]);
+        assert(isset($this->profileId));
+        return array_merge($attr, ['profileId' => $this->getProfileId()]);
     }
 
+    public function setProfileId(string $profileId): self
+    {
+        $this->profileId = $profileId;
+        return $this;
+    }
+    public function getProfileId(): string
+    {
+        return $this->profileId;
+    }
+
+    public function getName(): string
+    {
+        return $this->profileName;
+    }
+
+    /** @returns ProfileLocale[] */
+    public function getLocales(): array
+    {
+        return $this->locales->locale;
+    }
 
 }

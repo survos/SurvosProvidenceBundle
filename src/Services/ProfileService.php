@@ -1239,19 +1239,23 @@ END;
     {
         $filename = $this->xmlDir . "/$profileId.xml";
         assert(file_exists($filename), "Missing $filename");
-        $profile = (new XmlProfile())->setFilename($filename);
-        $profile->profileId = $profileId;
+//        $profile->profileId = $profileId;
         if ($load) {
             $profile = $this->loadXml(file_get_contents($filename));
+        } else {
+            // don't parse, just add the filenames
+            $profile = (new XmlProfile());
         }
         $profile
+            ->setProfileId($profileId)
             ->setFilename($filename);
 
         return $profile;
     }
 
 
-    public function getProfileFiles(?string $filename=null): iterable
+    /** @returns XmlProfile[] */
+    public function getXmlProfiles(?string $filename=null, bool $load=false): iterable
     {
         $profiles = [];
         $finder = new Finder();
@@ -1260,7 +1264,7 @@ END;
             if ($profileId == 'base') {
                 continue;
             }
-            array_push($profiles, $this->getXmlProfile($profileId));
+            array_push($profiles, $this->getXmlProfile($profileId, $load));
         }
         return $profiles;
     }

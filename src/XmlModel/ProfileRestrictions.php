@@ -18,9 +18,14 @@ class ProfileRestrictions
 //    public $restriction = [];
 //    public $screen = [];
 
+    /** @return ProfileSetting[] */
+    public function getSettings(): array
+    {
+        return $this->settings->setting;
+    }
     public function getCode()
     {
-        return $this->code ?: 'T.' . $this->table;
+        return isset($this->code) ? $this->code : 'T.' . $this->table;
     }
 
 }
