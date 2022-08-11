@@ -194,6 +194,9 @@ class ProfileService
 
     public function __construct(
         private string $xmlDir,
+        private string $confPath,
+        private string $docPath,
+        private string $fieldConfigPath,
         private bool $loadFromFiles,
         private readonly ValidatorInterface $validator,
         private readonly ParameterBagInterface $bag,
@@ -252,7 +255,7 @@ class ProfileService
     {
         if (!$this->coreTypes->count()) {
 //            $this->coreTypes = $this->loadCoreTypes();
-            $this->setup(fromFiles: $this->bag->get('internal_name') === 'profiles');
+            $this->setup(fromFiles: $this->loadFromFiles);
             assert($this->getCore('Coll'));
         }
         return $this->coreTypes;
@@ -285,7 +288,7 @@ class ProfileService
         return $core ?: null;
     }
 
-    public function parseXml($input)
+    public function parseXml($input): XmlProfile
     {
         // <article xmlns="http://example.org/">
         if (empty($input)) {
@@ -690,7 +693,8 @@ XML_WRAP;
 
     public function getRawModelData(): array
     {
-        return json_decode(str_replace('"ca_', '"', file_get_contents($this->bag->get('field_config_path'))), true, 512, JSON_THROW_ON_ERROR);
+        assert(file_exists($this->fieldConfigPath), $this->fieldConfigPath . " does not exist");
+        return json_decode(str_replace('"ca_', '"', file_get_contents($this->fieldConfigPath)), true, 512, JSON_THROW_ON_ERROR);
     }
 
     public function getModelDataByTable(string $caTable): array
@@ -755,7 +759,7 @@ XML_WRAP;
 
     public function getConf($code): array
     {
-        $fn = $this->bag->get('conf_path') . "/$code.conf";
+        $fn = $this->confPath . "/$code.conf";
 
         $new = [];
         assert(file_exists($fn), $fn);
@@ -839,10 +843,10 @@ XML_WRAP;
         assert(array_key_exists('tables', $conf), "Missing tables in conf");
 
         foreach ($conf['tables'] as $name=>$tableNum) {
-            $caTable = (new \App\Entity\CaTable())
+            $caTable = (new CaTable())
                 ->setCaTableNum($tableNum)
                 ->setName($name);
-            $this->entityManager->persist($caTable);
+//            $this->entityManager->persist($caTable);
             $this->tableNumCache[$tableNum] = $caTable;
             $this->tableNameCache[str_replace('ca_', '', (string) $name)] = $tableNum;
 
@@ -876,9 +880,8 @@ XML_WRAP;
         $systemLists = $this->getSystemLists();
 
         // use the documentation to create the initial cores: https://manual.collectiveaccess.org/dataModelling/primaryTables.html?highlight=primary%20tables
-        $docPath = $this->bag->get('doc_path');
 //        $dmPath = $docPath . '/_source/dataModelling';
-        $primary = $docPath . '/primaryTables.rst';
+        $primary = $this->docPath . '/primaryTables.rst';
         assert(file_exists($primary), "missing $primary");
         $rst = file_get_contents($primary);
         if (preg_match_all('/(.*?)\n\^+\n(.*?)\n/', $rst, $mm, PREG_SET_ORDER)) {
@@ -1101,7 +1104,7 @@ END;
     {
         $coreComponents = [];
         // get the config data that's been dumped from BaseObject
-        $rawModelData = json_decode(str_replace('"ca_', '"', file_get_contents($this->bag->get('field_config_path'))), true, 512, JSON_THROW_ON_ERROR);
+        $rawModelData = json_decode(str_replace('"ca_', '"', file_get_contents($this->fieldConfigPath)), true, 512, JSON_THROW_ON_ERROR);
 //        dd($rawModelData);
 
         // all core components have a _labels table
@@ -1181,6 +1184,7 @@ END;
                 if (array_key_exists($labelsTable, $rawModelData)) {
                 } else {
                 }
+
                 //BaseModel::$s_ca_models_definitions['ca_entity_labels']
             }
         }
@@ -1231,48 +1235,43 @@ END;
 //        dd('const CORE_TABLES=[' . join(',', array_map(fn($key) => "'$key'", array_keys($coreComponents)))) . ']';
     }
 
-    public function getProfileFiles()
+    public function getXmlProfile(string $profileId, bool $load=false): XmlProfile
     {
+        $filename = $this->xmlDir . "/$profileId.xml";
+        assert(file_exists($filename), "Missing $filename");
+        $profile = (new XmlProfile())->setFilename($filename);
+        $profile->profileId = $profileId;
+        if ($load) {
+            $profile = $this->loadXml(file_get_contents($filename));
+        }
+        $profile
+            ->setFilename($filename);
 
+        return $profile;
     }
 
-    public function loadXml($filename = null, $updateDatabase = false): ?array
+
+    public function getProfileFiles(?string $filename=null): iterable
     {
-        static $profiles = [];
-        if (count($profiles)) {
-            return $filename ? array_filter($profiles, fn (\App\Entity\Profile $profile) => $profile->getFilename() === $filename) : $profiles; // if loaded by menu;
-        }
-        $fieldData = $this->getCaBaseModelData();
-        assert(!empty($this->relationshipTables));
-
-//        $XML_PROFILES_PATH='/home/tac/survos/ca/install/profiles/xml'; // hack for now.
-        $XML_PROFILES_PATH = $this->bag->get('xml_profiles_path');
-
         $profiles = [];
         $finder = new Finder();
-        foreach ($finder->files()->depth('<2')->in($XML_PROFILES_PATH)->name($filename ? $filename . '.xml' : '*.xml')->notName('base.xml') as $fileInfo) {
-            $source = $fileInfo->getPathname();
+        foreach ($finder->files()->depth('<2')->in($this->xmlDir)->name($filename ? $filename . '.xml' : '*.xml')->notName('base.xml') as $fileInfo) {
             $profileId = $fileInfo->getFilenameWithoutExtension();
             if ($profileId == 'base') {
                 continue;
             }
-            $profile = $updateDatabase ? $this->profileRepository->findOneBy(['filename' => $profileId]) : null;
+            array_push($profiles, $this->getXmlProfile($profileId));
+        }
+        return $profiles;
+    }
 
-            if (!$profile) {
-                $profile = (new \App\Entity\Profile())->setName($profileId)->setFilename($profileId)//                    ->setSource($source)
-                ;
-                if ($updateDatabase) {
-                    $this->entityManager->persist($profile);
-                }
-            }
-            array_push($profiles, $profile);
-            $this->logger->info("Loading " . $profile->getFilename());
-
-            $xml = file_get_contents($source);
+    public function loadXml(string $xml, $updateDatabase = false): XmlProfile
+    {
+         $fieldData = $this->getCaBaseModelData();
 
             // for some reason, settings aren't working as expected.
             $pattern = '|(<setting name="([^"]+)"[^(>$)]*)>([^<]+)</setting>|';
-            assert(preg_match($pattern, $xml), "$pattern not found in xml. " . $profile->getFilename());
+            assert(preg_match($pattern, $xml), "$pattern not found in xml. ");
             // tweak the xml so that settings can be read as attribute (v) and an element.
             $xml = preg_replace_callback($pattern, function ($m) {
                 return ($m[2] <> 'display_template') ? sprintf("%s v='%s'>%s</setting>", $m[1], $m[3], $m[3]) : $m[0];
@@ -1281,13 +1280,18 @@ END;
             }, $xml);
 //            $xml = preg_replace('|(<setting[^(>$)]+)>([^<]+)</setting>|', "$1 v=\"$2\">$2</setting>", $xml);
 
-            $profile->setXml($xml);
+//            $profile->setXml($xml);
 
             // when xdebug is on, this takes too long to parse.
             $xmlProfile = $this->parseXml($xml);
             if ($xmlProfile) {
-                $profile->setXmlProfile($xmlProfile);
-                $profile->setDescription($xmlProfile->profileDescription)->setUiCount(is_countable($xmlProfile->getUserInterfaces()) ? count($xmlProfile->getUserInterfaces()) : 0)->setListCount(is_countable($xmlProfile->getLists()) ? count($xmlProfile->getLists()) : 0)->setDisplayCount(is_countable($xmlProfile->getDisplays()) ? count($xmlProfile->getDisplays()) : 0)->setMdeCount(is_countable($xmlProfile->getElements()) ? count($xmlProfile->getElements()) : 0)->setInfoUrl($xmlProfile->infoUrl);
+                $xmlProfile
+//                    ->setDescription($xmlProfile->profileDescription)
+                    ->setUiCount(is_countable($xmlProfile->getUserInterfaces()) ? count($xmlProfile->getUserInterfaces()) : 0)
+                    ->setListCount(is_countable($xmlProfile->getLists()) ? count($xmlProfile->getLists()) : 0)
+                    ->setDisplayCount(is_countable($xmlProfile->getDisplays()) ? count($xmlProfile->getDisplays()) : 0)
+                    ->setMdeCount(is_countable($xmlProfile->getElements()) ? count($xmlProfile->getElements()) : 0)
+                    ->setInfoUrl($xmlProfile->infoUrl);
                 try {
                 } catch (\Exception $e) {
                     $this->logger->error($e->getMessage(), [$profile->getFilename()]);
@@ -1364,8 +1368,7 @@ END;
 //            foreach ($xmlProfile->getElements() as $element) {
 //                dd($element);
 //            }
-        }
-        return $profiles;
+        return $xmlProfile;
     }
 
     /** @deprecated */

@@ -7,6 +7,7 @@ class XmlProfile
     use XmlAttributesTrait;
 
     public $profileName;
+    public string $profileId = '~';
     public $profileDescription;
     public ProfileLists $lists;
     public $locales = [];
@@ -21,6 +22,122 @@ class XmlProfile
     public $searchForms;
     public $logins;
     public $roles;
+    private string $filename;
+    private string $xml;
+
+    private int $mdeCount;
+    private int $uiCount;
+    private int $listCount;
+    private int $displayCount;
+
+    /**
+     * @return mixed
+     */
+    public function getInfoUrl()
+    {
+        return $this->infoUrl;
+    }
+
+    /**
+     * @param mixed $infoUrl
+     * @return XmlProfile
+     */
+    public function setInfoUrl($infoUrl)
+    {
+        $this->infoUrl = $infoUrl;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getMdeCount(): int
+    {
+        return $this->mdeCount;
+    }
+
+    /**
+     * @param int $mdeCount
+     * @return XmlProfile
+     */
+    public function setMdeCount(int $mdeCount): XmlProfile
+    {
+        $this->mdeCount = $mdeCount;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getUiCount(): int
+    {
+        return $this->uiCount;
+    }
+
+    /**
+     * @param int $uiCount
+     * @return XmlProfile
+     */
+    public function setUiCount(int $uiCount): XmlProfile
+    {
+        $this->uiCount = $uiCount;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getListCount(): int
+    {
+        return $this->listCount;
+    }
+
+    /**
+     * @param int $listCount
+     * @return XmlProfile
+     */
+    public function setListCount(int $listCount): XmlProfile
+    {
+        $this->listCount = $listCount;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getDisplayCount(): int
+    {
+        return $this->displayCount;
+    }
+
+    /**
+     * @param int $displayCount
+     * @return XmlProfile
+     */
+    public function setDisplayCount(int $displayCount): XmlProfile
+    {
+        $this->displayCount = $displayCount;
+        return $this;
+    }
+
+
+    /**
+     * @return string
+     */
+    public function getXml(): string
+    {
+        return $this->xml;
+    }
+
+    /**
+     * @param string $xml
+     * @return XmlProfile
+     */
+    public function setXml(string $xml): XmlProfile
+    {
+        $this->xml = $xml;
+        return $this;
+    }
 
     public $metadataAlerts;
 
@@ -102,5 +219,22 @@ class XmlProfile
     public function getListByCode($code) {
         return $this->getListsByCode()[$code] ?? null;
     }
+
+    public function setFilename(string $path): self
+    {
+        $this->filepath = $path;
+        return $this;
+    }
+
+    public function getFilename(): string
+    {
+        return $this->filepath;
+    }
+
+    public function getRp(array $attr = []): array
+    {
+        return array_merge($attr, ['profileId' => $this->profileName]);
+    }
+
 
 }

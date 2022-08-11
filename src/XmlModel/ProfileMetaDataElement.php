@@ -25,7 +25,10 @@ class ProfileMetaDataElement
     public function getElements() { return $this->elements->metadataElement; }
 
     /** @returns ProfileTypeRestrictions[] */
-    public function getTypeRestrictions(): array { return $this->typeRestrictions ? $this->typeRestrictions->restriction: []; }
+    public function getTypeRestrictions(): array {
+        return $this->typeRestrictions->restriction;
+//        return $this->typeRestrictions ? $this->typeRestrictions->restriction: [];
+    }
 
 
 //    public function setCode($str) { dd($str); }

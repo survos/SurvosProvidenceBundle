@@ -7,7 +7,6 @@ class ProfileRelationshipTable
 {
     use XmlAttributesTrait;
 
-    /** @var ProfileRelationshipTableType */
     public ProfileRelationshipTableTypes $types;
     public $name;
     public string $code;
@@ -16,10 +15,10 @@ class ProfileRelationshipTable
         return $this->name;
     }
 
-    /** @return ProfileRelationshipTableType[] */
+    /** @return ProfileRelationshipTypes[] */
     public function getTypes() { return $this->types->type; }
 
-    public function _label() { return sprintf("%s.%s", 'rel', $this->getCode()); }
+    public function _label() { return sprintf("%s.%s", 'rel', $this->name); }
 
     public function findByCode($code): array
     {

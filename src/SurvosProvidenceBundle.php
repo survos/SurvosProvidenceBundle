@@ -6,6 +6,7 @@ use Survos\Providence\Command\ExportCommand;
 use Survos\Providence\Services\ProfileService;
 use Survos\Providence\Services\ProvidenceService;
 use Survos\Providence\Twig\TwigExtension;
+use Survos\Providence\XmlModel\XmlProfile;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
@@ -26,6 +27,11 @@ class SurvosProvidenceBundle extends AbstractBundle
             ->addTag('console.command')
         ;
 
+        $builder
+            ->autowire($id = 'survos.providence.xml_profile', XmlProfile::class)
+            ->setPublic(true);
+        $container->services()->alias(XmlProfile::class, $id);
+
         $providence_service_id = 'survos.providence_service';
         $builder
             ->autowire($providence_service_id, ProvidenceService::class)
@@ -41,6 +47,9 @@ class SurvosProvidenceBundle extends AbstractBundle
         ;
         $definition->setArgument('$xmlDir', $config['xml_dir']);
         $definition->setArgument('$loadFromFiles', $config['load_from_files']);
+        $definition->setArgument('$confPath', $config['conf_path']);
+        $definition->setArgument('$docPath', $config['doc_path']);
+        $definition->setArgument('$fieldConfigPath', $config['field_config_path']);
 //        $definition->setArgument('$height', $config['height']);
 //        $definition->setArgument('$foregroundColor', $config['foregroundColor']);
     }
@@ -51,7 +60,14 @@ class SurvosProvidenceBundle extends AbstractBundle
         $definition->rootNode()
             ->children()
 //            ->arrayNode('routes_to_skip')->defaultValue(['app_logout'])->end()
-            ->scalarNode('xml_dir')->defaultValue("vendor/collectiveaccess/install/xml")->end()
+            ->scalarNode('conf_path')->defaultValue(__DIR__ . '/../config/providence-conf')->end()
+            ->scalarNode('xml_dir')->defaultValue(__DIR__ . '/../config/xml')->end()
+            ->scalarNode('doc_path')->defaultValue(__DIR__ . '/../config/')->end()
+            ->scalarNode('field_config_path')->defaultValue(__DIR__ . '/../config/ca_models.json')->end()
+
+            // generated from    doc_path: '%kernel.project_dir%/../ac/config'
+//file_put_contents($fn = dirname(__DIR__) . '/../survos/ca/ca-fix/config/ca_models.json', json_encode(BaseModel::$s_ca_models_definitions, JSON_PRETTY_PRINT)) && dd($fn);
+
             ->booleanNode('load_from_files')->defaultValue(true)->end()
             ->end();
         ;
