@@ -28,12 +28,14 @@ class ProvidenceService
         $projectDir = $this->bag->get('kernel.project_dir');
 
         $finder = new Finder();
+
+        // first, move them to the local directory, so they can then be dumped.
         foreach ($finder->in($this->provPath . '/app/locale')->name('*.po')->files() as $splFileInfo) {
             $locale = $splFileInfo->getRelativePath();
             $dest = $projectDir . '/translations/ca.' . $locale . '.' . $splFileInfo->getExtension();
-            copy($splFileInfo->getRealPath(), $dest);
+//            copy($splFileInfo->getRealPath(), $dest);
         }
-        //        dd('stopped');
+//                dd('stopped');
         // change the .po to .yaml.  Then use the +icu message style to overwrite those messages.
         foreach (['es' => ['es_ES', 'es_MX'], 'en' => ['en_US', 'en_GB', 'en_CA']] as $lang => $locales) {
             foreach ($locales as $locale) {
@@ -63,4 +65,46 @@ class ProvidenceService
         }
     }
 
+    public function getPOExample()
+    {
+        // Goal: {{ 'elements.defined'|trans({n: n}, 'ca') }}
+
+        // CA CODE:
+//        if ($vn_element_count == 1) {
+//            print "<div>"._t("1 element is defined")."</div>";
+//        } else {
+//            print "<div>"._t("%1 elements are defined", $vn_element_count)."</div>";
+//        }
+
+        return <<< END
+#: ../../themes/default/views/manage/widget_comments_info_html.php:33
+msgid "User comments"
+msgstr "Comentarios de usuarios"
+
+#: ../../themes/default/views/manage/widget_comments_info_html.php:36
+msgid "1 comment needs moderation"
+msgstr "1 comentario ha de ser moderado"
+
+#: ../../themes/default/views/manage/widget_comments_info_html.php:38
+msgid "%1 comments need moderation"
+msgstr "%1 comentario ha de ser moderado"
+
+#: ../../themes/default/views/manage/widget_comments_info_html.php:43
+msgid "1 moderated comment"
+msgstr "1 comentario moderado"
+
+#: ../../themes/default/views/manage/widget_comments_info_html.php:45
+msgid "%1 moderated comments"
+msgstr "%1 comentarios moderados"
+
+#: ../../themes/default/views/manage/widget_comments_info_html.php:50
+msgid "1 comment total"
+msgstr "1 comentario en total"
+
+#: ../../themes/default/views/manage/widget_comments_info_html.php:52
+msgid "%1 comments total"
+msgstr "%1 comentarios en total"
+END;
+
+    }
 }

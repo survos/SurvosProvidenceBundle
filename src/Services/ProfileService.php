@@ -1255,7 +1255,7 @@ END;
 
 
     /** @returns XmlProfile[] */
-    public function getXmlProfiles(?string $filename=null, bool $load=false): iterable
+    public function getXmlProfiles(?string $filename=null, bool $load=true): iterable
     {
         $profiles = [];
         $finder = new Finder();
@@ -1928,14 +1928,33 @@ END;
         return $x;
     }
 
-    public function loadLabelsFromXml(XmlProfile $profile)
+
+    private $translationLabels = [];
+    /** @param ProfileLabel[] */
+    private function addLabels(array $labels, $el)// string $code, string $componentType)
     {
-        $localMap = ['en' => 'en_US', 'fr' => 'fr_FR'];
-        $locale = 'en_US'; // @todo: get from xml
+        dd($el);
+        foreach($labels as $label) {
+            $this->translationLabels[$label->locale][$componentType . '.' . $code . '.name'] = $label->name;
+            $this->translationLabels[$label->locale][$componentType . '.' . $code . '.name'] = $label->name;
+            $this->translationLabels[$label->locale][$componentType . '.' . $code . '.description'] = $label->description;
+        }
+    }
+
+    public function loadLabelsFromXml(XmlProfile $profile): array
+    {
+        // really we should implement a LabelsInterface, then just get the right classes.s
+        foreach ($profile->getLocales() as $locale) {
+//        $localMap = ['en' => 'en_US', 'fr' => 'fr_FR'];
+        $localeCode = $locale->lang . '_' . $locale->country; // 'en_US'; // @todo: get from xml
         /** @var ProfileUserInterface $ui */
         foreach ($profile->getUserInterfaces() as $ui) {
-            $labels = array_filter($ui->getLabels(), fn (ProfileLabel $label) => $label->locale == 'en_US');
+
+            $labels = $ui->getLabels();
+
+//            $labels = array_filter($ui->getLabels(), fn (ProfileLabel $label) => $label->locale == 'en_US');
 //                dump($labels);
+            $this->addLabels($labels, $ui); //  $ui->code, 'ui');
             if ($l = array_pop($labels)) {
                 $translations[$ui->_label()] = $l->name;
                 $translations[$ui->_description()] = $l->description ?: " ";
@@ -1943,7 +1962,7 @@ END;
 
             /** @var ProfileScreen $screen */
             foreach ($ui->getScreens() as $screen) {
-                $labels = array_filter($screen->getLabels(), fn (ProfileLabel $label) => $label->locale == 'en_US');
+                $labels = array_filter($screen->getLabels());
 
                 if ($l = array_pop($labels)) {
                     $translations[$screen->_label()] = $l->name;
@@ -1956,14 +1975,16 @@ END;
 
         /** @var ProfileLists $list */
         foreach ($profile->getLists() as $list) {
-            $labels = array_filter($list->getLabels(), fn (ProfileLabel $label) => $label->locale == $locale);
+            $labels = $list->getLabels();
+//            $labels = array_filter($list->getLabels(), fn (ProfileLabel $label) => $label->locale == $locale);
             if ($l = array_pop($labels)) {
                 $translations[$list->_label()] = html_entity_decode((string) $l->name);
                 $translations[$list->_description()] = html_entity_decode((string) $l->description) ?: " ";
             }
 //                dump($list);
             foreach ($list->getItems() as $item) {
-                $labels = array_filter($item->getLabels(), fn (ProfileLabel $label) => $label->locale == $locale);
+                $labels = $item->getLabels();
+//                $labels = array_filter($item->getLabels(), fn (ProfileLabel $label) => $label->locale == $locale);
                 if ($l = array_pop($labels)) {
                     $translations[$item->_t($list)] = $l->name ?: $l->name_singular;
 //                        $translations[$item->_label()] = $l->name;
@@ -2013,6 +2034,12 @@ END;
 //                        {% endfor %}
             }
         }
+        $locales[$localeCode] = $translations;
+        dd($localeCode, $translations);
+        }
+
+
+        return $translations;
         // maybe use xpath to get all the Labels?
     }
 

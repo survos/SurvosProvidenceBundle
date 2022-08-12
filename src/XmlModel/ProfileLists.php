@@ -5,11 +5,12 @@ namespace Survos\Providence\XmlModel;
 class ProfileLists
 {
     use XmlAttributesTrait;
+    use XmlLabelsTrait;
 
     /** @var ProfileList[] */
     public $list = [];
-    /** @var ProfileLabels[] */
-    public $labels = [];
+//    /** @var ProfileLabels[] */
+//    public $labels = [];
 
     public function findByCode($code): array
     {

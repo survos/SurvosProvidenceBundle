@@ -5,10 +5,12 @@ namespace Survos\Providence\XmlModel;
 use Survos\Providence\Repository\ProfileUserInterfaceRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-class ProfileUserInterface
+class ProfileUserInterface implements XmlLabelsInterface
 {
     use XmlAttributesTrait;
     use XmlLabelsTrait;
+
+    public const LABEL_PREFIX = 'ui';
 
     public $type;
 

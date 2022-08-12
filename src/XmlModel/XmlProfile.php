@@ -256,7 +256,7 @@ class XmlProfile
     /** @returns ProfileLocale[] */
     public function getLocales(): array
     {
-        return $this->locales->locale;
+        return isset($this->locales) ? $this->locales->locale: [];
     }
 
 }
