@@ -35,6 +35,9 @@ class SurvosProvidenceBundle extends AbstractBundle
         $providence_service_id = 'survos.providence_service';
         $builder
             ->autowire($providence_service_id, ProvidenceService::class)
+            ->setArgument('$translator', new Reference('translator'))
+            ->setArgument('$provPath', $config['prov_path'])
+            ->setArgument('$bag', new Reference('parameter_bag'))
             ->setPublic(true)
             ;
         $container->services()->alias(ProvidenceService::class, $providence_service_id);
@@ -63,6 +66,7 @@ class SurvosProvidenceBundle extends AbstractBundle
             ->scalarNode('conf_path')->defaultValue(__DIR__ . '/../config/providence-conf')->end()
             ->scalarNode('xml_dir')->defaultValue(__DIR__ . '/../config/xml')->end()
             ->scalarNode('doc_path')->defaultValue(__DIR__ . '/../config/')->end()
+            ->scalarNode('prov_path')->defaultValue(__DIR__ . '/../providence/')->end()
             ->scalarNode('field_config_path')->defaultValue(__DIR__ . '/../config/ca_models.json')->end()
 
             // generated from    doc_path: '%kernel.project_dir%/../ac/config'
