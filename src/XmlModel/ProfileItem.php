@@ -2,7 +2,7 @@
 
 namespace Survos\Providence\XmlModel;
 
-class ProfileItem
+class ProfileItem implements XmlLabelsInterface
 {
     use XmlAttributesTrait;
     use XmlLabelsTrait;

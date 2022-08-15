@@ -259,4 +259,9 @@ class XmlProfile
         return isset($this->locales) ? $this->locales->locale: [];
     }
 
+    public function getTranslationFilename($locale)
+    {
+        return sprintf('/translations/%s+intl-icu.%s.yaml', $this->getProfileId(), $locale);
+    }
+
 }

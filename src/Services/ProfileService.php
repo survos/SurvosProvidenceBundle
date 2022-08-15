@@ -3,6 +3,7 @@
 namespace Survos\Providence\Services;
 
 use Survos\Providence\Entity\Obj;
+
 //use Survos\Providence\Entity\Profile as EntityProfile;
 
 use Survos\Providence\Model\Field;
@@ -15,6 +16,7 @@ use Survos\Providence\Model\FieldDisplayType;
 use Survos\Providence\Model\SystemList;
 use Survos\Providence\Model\FieldType;
 
+use Survos\Providence\XmlModel\XmlLabelsInterface;
 use Survos\Providence\XmlModel\XmlProfile;
 use Survos\Providence\XmlModel\ProfileItem;
 use Survos\Providence\XmlModel\ProfileItems;
@@ -126,7 +128,7 @@ class ProfileService
     final const CATEGORY_SYSTEM = 'system';
     final const CATEGORIES = [self::CATEGORY_OBJ, self::CATEGORY_NON_OBJ, self::CATEGORY_UI, self::CATEGORY_META, self::CATEGORY_SYSTEM];
 
-    final public const OBJ_TABLES = ['objects',  'object_representations', 'object_lots', 'representation_annotations',         'representation_transcriptions',
+    final public const OBJ_TABLES = ['objects', 'object_representations', 'object_lots', 'representation_annotations', 'representation_transcriptions',
     ];
     final public const META_TABLES = [
 
@@ -160,7 +162,7 @@ class ProfileService
         'lists',
         'list_items',
 //        'users',
-        ];
+    ];
 
     final public const UI_TABLES = [
 
@@ -193,15 +195,15 @@ class ProfileService
     }
 
     public function __construct(
-        private string $xmlDir,
-        private string $confPath,
-        private string $docPath,
-        private string $fieldConfigPath,
-        private bool $loadFromFiles,
-        private readonly ValidatorInterface $validator,
-        private readonly ParameterBagInterface $bag,
-        private readonly LoggerInterface $logger,
-        private readonly Environment $twig,
+        private string                          $xmlDir,
+        private string                          $confPath,
+        private string                          $docPath,
+        private string                          $fieldConfigPath,
+        private bool                            $loadFromFiles,
+        private readonly ValidatorInterface     $validator,
+        private readonly ParameterBagInterface  $bag,
+        private readonly LoggerInterface        $logger,
+        private readonly Environment            $twig,
         private readonly EntityManagerInterface $entityManager)
     {
         $this->coreTypes = new ArrayCollection();
@@ -217,7 +219,7 @@ class ProfileService
         $map = [];
         $constants = get_defined_constants(true)['user'];
         foreach ($constants as $constant => $value) {
-            if (preg_match('/(DT|FT)_(.*)/', (string) $constant, $m)) {
+            if (preg_match('/(DT|FT)_(.*)/', (string)$constant, $m)) {
                 [$all, $prefix, $name] = $m;
                 $map[$prefix][$value] = $name;
             }
@@ -225,7 +227,7 @@ class ProfileService
         return $map;
     }
 
-    public function setup($fromFiles=false)
+    public function setup($fromFiles = false)
     {
         $this->coreTypes = $this->loadCoreTypes($fromFiles);
         $this->setupSystemLists();
@@ -264,23 +266,23 @@ class ProfileService
     public function getCoreTypeCodes()
     {
         return $this->getCoreTypes()->map(
-            fn (Core $core) => $core->getEntityName()
+            fn(Core $core) => $core->getEntityName()
         )->toArray();
     }
 
 
-    public function getCore($name, $throwError=true): ?Core
+    public function getCore($name, $throwError = true): ?Core
     {
 
         // hack, strip fqcl
-        $name = str_replace('ca_', '', (string) $name);
-        if(in_array($name, ['users'])) {
+        $name = str_replace('ca_', '', (string)$name);
+        if (in_array($name, ['users'])) {
             return null;
         }
         $name = str_replace('App\\Entity\\', '', $name);
 //        assert(in_array($name, $this->getCoreTypeCodes()), "Missing core $name " . join(',', $this->getCoreTypeCodes()));
         $core = $this->getCoreTypes()->filter(
-            fn (Core $core) => in_array($name, [$core->getCaTable(), $core->getEntityName()])
+            fn(Core $core) => in_array($name, [$core->getCaTable(), $core->getEntityName()])
         )->first();
         if ($throwError) {
             assert($core, $name);
@@ -408,7 +410,7 @@ XML_WRAP;
                 'debug' => false
             ])->resolve($options);
 
-        $fields = $core->getFields()->filter(fn (Field $field) => $field->getDbType()
+        $fields = $core->getFields()->filter(fn(Field $field) => $field->getDbType()
             && !in_array($field->getName(), [''])
             && !in_array($field->getCaFieldType(), [self::ONE_TO_MANY, self::MANY_TO_ONE]));
         foreach ($fields as $field) {
@@ -490,17 +492,17 @@ XML_WRAP;
 
         if (!empty($core)) {
             $traitCode = $this->twig->render("php/trait.php.twig", [
-        'core' => $core, // the used by
-        'entityName' => $entityName,
+                'core' => $core, // the used by
+                'entityName' => $entityName,
 
-        'privateVar' => u($entityName . 's')->camel() // type, source, label
+                'privateVar' => u($entityName . 's')->camel() // type, source, label
 //            // hack!
 //            'core' => $core = (new Core())
 //                ->setPlural($name)
 //                ->setSingular($name)
 //            ->setEntityName($entityName),
 //            'entityName' => $entityName]
-    ]);
+            ]);
 //    dd($core, $sysList, $sysList->getUsedBy(), $traitCode);
         } else {
             $traitCode = null;
@@ -546,26 +548,26 @@ XML_WRAP;
             return $systemLists;
         }
 
-            if (!file_exists($fn = "/tmp/vocab.html")) {
-                try {
-                    $html = file_get_contents('https://docs.collectiveaccess.org/wiki/List_and_Vocabulary_Management');
-                    file_put_contents($fn, $html);
-                } catch (\Exception) {
-                    // doh!  maybe just check this in?
-                    $html = '';
-                }
-            } else {
-                $html = file_get_contents($fn);
-
+        if (!file_exists($fn = "/tmp/vocab.html")) {
+            try {
+                $html = file_get_contents('https://docs.collectiveaccess.org/wiki/List_and_Vocabulary_Management');
+                file_put_contents($fn, $html);
+            } catch (\Exception) {
+                // doh!  maybe just check this in?
+                $html = '';
             }
+        } else {
+            $html = file_get_contents($fn);
 
-            $crawler = new Crawler($html);
-            $table = $crawler->filter('table')->filter('tr')->each(fn($tr, $i) => $tr->filter('td')->each(fn($td, $i): string => trim((string) $td->text())));
-            array_shift($table);
-            $lists = [];
-            foreach ($table as [$key, $description]) {
-                $lists[$key] = $description;
-            }
+        }
+
+        $crawler = new Crawler($html);
+        $table = $crawler->filter('table')->filter('tr')->each(fn($tr, $i) => $tr->filter('td')->each(fn($td, $i): string => trim((string)$td->text())));
+        array_shift($table);
+        $lists = [];
+        foreach ($table as [$key, $description]) {
+            $lists[$key] = $description;
+        }
         // missing from vocabulary list
 //        array_push($table, ['object_representation_types',"A value from the object_representation_types list indicating the type of the record. Stored as an internally generated numeric item_id. When setting this value in a data import or via an API call the item identifier may be used."]);
 //        array_push($table, ['loan_types',"type of the loan. eg. incoming loan, outgoing loan, etc"]);
@@ -607,8 +609,8 @@ XML_WRAP;
             $list = (new SystemList())
                 ->setCode($key)
                 ->setDescription($description)
-                ->setIsOneAndOnlyOne(preg_match('/and only one/', (string) $description))
-                ->setIsTree(preg_match('/hierarchically/', (string) $description))
+                ->setIsOneAndOnlyOne(preg_match('/and only one/', (string)$description))
+                ->setIsTree(preg_match('/hierarchically/', (string)$description))
                 ->setIsLabel(preg_match('/label/', $key));
             $name = $key;
             // hacks
@@ -616,7 +618,7 @@ XML_WRAP;
             $name = str_replace('atuses', 'atus_code', $name);
             $name = preg_replace('/s$/', '', $name);
 
-            $list->setEntityName(ucfirst((string) u($name)->camel()));
+            $list->setEntityName(ucfirst((string)u($name)->camel()));
 
             $systemLists[$key] = $list;
 
@@ -764,7 +766,7 @@ XML_WRAP;
         $new = [];
         assert(file_exists($fn), $fn);
         foreach (file($fn) as $line) {
-            $line = trim((string) $line);
+            $line = trim((string)$line);
             if (empty($line)) {
                 continue;
             }
@@ -775,7 +777,7 @@ XML_WRAP;
             }
             if (preg_match($pattern = '/^(\w+) +=(.*?)$/', $line, $m)) {
                 [$all, $key, $value] = $m;
-                $value = trim((string) $value);
+                $value = trim((string)$value);
                 if ($value === '{') {
                     $line = sprintf('"%s" : {', $key);
                 } else {
@@ -811,17 +813,18 @@ XML_WRAP;
 
     private array $tableNumCache = []; // hackish
     private array $tableNameCache = []; // name to tableNum
-    public function getCaTable(?int $tableNum=null): array|\App\Entity\CaTable
+
+    public function getCaTable(?int $tableNum = null): array|\App\Entity\CaTable
     {
         return $tableNum ? $this->tableNumCache[$tableNum] : $this->tableNumCache;
     }
 
-    public function getCaTableNumByName(?string $tableName=null): ?int
+    public function getCaTableNumByName(?string $tableName = null): ?int
     {
         return $tableName ? $this->tableNameCache[$tableName] : $this->tableNameCache;
     }
 
-    private function loadCoreTypes($fromFiles=false): ArrayCollection
+    private function loadCoreTypes($fromFiles = false): ArrayCollection
     {
         static $alreadyLoaded = false;
 
@@ -842,13 +845,13 @@ XML_WRAP;
 
         assert(array_key_exists('tables', $conf), "Missing tables in conf");
 
-        foreach ($conf['tables'] as $name=>$tableNum) {
+        foreach ($conf['tables'] as $name => $tableNum) {
             $caTable = (new CaTable())
                 ->setCaTableNum($tableNum)
                 ->setName($name);
 //            $this->entityManager->persist($caTable);
             $this->tableNumCache[$tableNum] = $caTable;
-            $this->tableNameCache[str_replace('ca_', '', (string) $name)] = $tableNum;
+            $this->tableNameCache[str_replace('ca_', '', (string)$name)] = $tableNum;
 
             // the database references table_num in the restrictions...
             // relationships? Tie to core?  To import?
@@ -863,7 +866,7 @@ XML_WRAP;
     /** @return Core[] */
     public function getCoresByCategory(string $categoryCode): ArrayCollection
     {
-        return $this->getCoreTypes()->filter(fn(Core $core) => $core->getCategoryCode() === $categoryCode );
+        return $this->getCoreTypes()->filter(fn(Core $core) => $core->getCategoryCode() === $categoryCode);
     }
 
     // we could also load from classes, using the attributes.
@@ -886,7 +889,7 @@ XML_WRAP;
         $rst = file_get_contents($primary);
         if (preg_match_all('/(.*?)\n\^+\n(.*?)\n/', $rst, $mm, PREG_SET_ORDER)) {
             foreach ($mm as [$all, $labels, $description]) {
-                if (preg_match('/(.*?)\(ca_(.*?)\)/', (string) $labels, $mmm)) {
+                if (preg_match('/(.*?)\(ca_(.*?)\)/', (string)$labels, $mmm)) {
                     [$all, $name, $coreTable] = $mmm;
                     $descriptions[$coreTable] = $description;
                 }
@@ -909,16 +912,16 @@ XML_WRAP;
         foreach ($typeConstants as $prefix => $values) {
             foreach ($values as $idx => $value) {
                 assert(is_int($idx), $idx . json_encode($values, JSON_THROW_ON_ERROR));
-                $relatedEntity   = (($prefix == 'DT') ? new FieldDisplayType() : new FieldType())
-                        ->setCaId($idx)
-                        ->setCode(u($value)->lower()->toString())
-                        ->setName(u($value)->lower()->title()->toString());
+                $relatedEntity = (($prefix == 'DT') ? new FieldDisplayType() : new FieldType())
+                    ->setCaId($idx)
+                    ->setCode(u($value)->lower()->toString())
+                    ->setName(u($value)->lower()->title()->toString());
 
                 $errors = $this->validator->validate($relatedEntity);
                 assert($errors->count() == 0, "Invalid entity " . $value);
 
 //                $this->entityManager->persist($relatedEntity); @todo: move to callback or complete out of this bundle
-                $related[$prefix][$idx]  = $relatedEntity;
+                $related[$prefix][$idx] = $relatedEntity;
             }
         }
         // a nestedListItem can be a field type.  The customFieldType has the pointer to the list, the item itself is in attributes
@@ -947,19 +950,17 @@ XML_WRAP;
             $singular = preg_replace('/ies$/', 'y', $coreTableName);
             $singular = preg_replace('/s$/', '', $singular);
 //            if (!in_array($singular, ['acl', 'user', 'application_var', 'attribute','bookmark_folder','bookmark']))
-                $labelTable = $singular . '_labels';
-                if (array_key_exists($labelTable, $rawModelData)) {
-                    $data['labels'] = $rawModelData[$labelTable];
-                } else {
-                    $labelTable = null;
-                }
+            $labelTable = $singular . '_labels';
+            if (array_key_exists($labelTable, $rawModelData)) {
+                $data['labels'] = $rawModelData[$labelTable];
+            } else {
+                $labelTable = null;
+            }
 //
 //                if (in_array($coreTableName, $tablesToCheck = array_merge(self::NON_OBJ_TABLES, self::OBJ_TABLES))) {
 ////                    dd($coreTableName, $tablesToCheck);
 //                    assert(array_key_exists($labelTable, $rawModelData), "missing '$labelTable' (from $coreTableName) [$singular] ");
 //                }
-
-
 
 
             // singularize, then add _labels.
@@ -992,8 +993,7 @@ XML_WRAP;
 
             } elseif (in_array($coreTableName, self::META_TABLES)) {
                 $core->setCategoryCode(self::CATEGORY_META);
-            }
-            elseif (in_array($coreTableName, self::SYSTEM_TABLES)) {
+            } elseif (in_array($coreTableName, self::SYSTEM_TABLES)) {
                 $core->setCategoryCode(self::CATEGORY_SYSTEM);
 
             } elseif (in_array($coreTableName, self::META_TABLES)) {
@@ -1044,7 +1044,7 @@ XML_WRAP;
 
 
         // to get the relationships, get the keys that begin with <name>_x_
-        foreach (array_filter($rawModelData, fn ($key) => str_contains($key, '_x_'), ARRAY_FILTER_USE_KEY) as $tableName => $data) {
+        foreach (array_filter($rawModelData, fn($key) => str_contains($key, '_x_'), ARRAY_FILTER_USE_KEY) as $tableName => $data) {
             [$core_table, $relation] = explode('_x_', $tableName);
             // ignore 'items', might not be used.
             if (in_array($core_table, ['items'])) {
@@ -1134,7 +1134,7 @@ END;
 
 
         foreach ($rawModelData as $tableName => $data) {
-            if (preg_match('/queue|guid|user_role|user_groups|groups|locales|attribute_value_multifiles|attribute_values/', (string) $tableName)) {
+            if (preg_match('/queue|guid|user_role|user_groups|groups|locales|attribute_value_multifiles|attribute_values/', (string)$tableName)) {
                 continue;
             }
 
@@ -1142,12 +1142,12 @@ END;
             $type = $tableName; // original, for lookup later with ca_entities, etc.
 //            $tableName = str_replace('ca_', '', $tableName);
             // appears that these are no longer used.
-            if (preg_match('/^item/', (string) $tableName)) {
+            if (preg_match('/^item/', (string)$tableName)) {
 //                dump($tableName);
                 continue;
             }
 
-            if (preg_match('/^metadata_elem/', (string) $tableName)) {
+            if (preg_match('/^metadata_elem/', (string)$tableName)) {
 //                dd($tableName, $data);
 //                continue;
             }
@@ -1155,7 +1155,7 @@ END;
 //            if (in_array($tableName, ['items', 'item_tags', 'item_comments', 'item_labels'])) {
 //                continue;
 //            }
-            $parts = explode('_x_', (string) $tableName);
+            $parts = explode('_x_', (string)$tableName);
             if (count($parts) == 2) {
                 [$core, $relation] = $parts;
                 $this->relationshipTables[$tableName] = [
@@ -1166,7 +1166,7 @@ END;
                     dd($tableName);
                 }
             } else {
-                if (preg_match('/(.*?)_(labels)/', (string) $tableName, $m)) {
+                if (preg_match('/(.*?)_(labels)/', (string)$tableName, $m)) {
                     $core = $m[1] . 's'; // @todo: tags? comments?
 //                    $data['list_name'] = $m[0];
                     $coreComponents[$core][$m[2]] = $data;
@@ -1235,7 +1235,7 @@ END;
 //        dd('const CORE_TABLES=[' . join(',', array_map(fn($key) => "'$key'", array_keys($coreComponents)))) . ']';
     }
 
-    public function getXmlProfile(string $profileId, bool $load=false): XmlProfile
+    public function getXmlProfile(string $profileId, bool $load = false): XmlProfile
     {
         $filename = $this->xmlDir . "/$profileId.xml";
         assert(file_exists($filename), "Missing $filename");
@@ -1255,7 +1255,7 @@ END;
 
 
     /** @returns XmlProfile[] */
-    public function getXmlProfiles(?string $filename=null, bool $load=true): iterable
+    public function getXmlProfiles(?string $filename = null, bool $load = true): iterable
     {
         $profiles = [];
         $finder = new Finder();
@@ -1271,64 +1271,64 @@ END;
 
     public function loadXml(string $xml, $updateDatabase = false): XmlProfile
     {
-         $fieldData = $this->getCaBaseModelData();
+        $fieldData = $this->getCaBaseModelData();
 
-            // for some reason, settings aren't working as expected.
-            $pattern = '|(<setting name="([^"]+)"[^(>$)]*)>([^<]+)</setting>|';
-            assert(preg_match($pattern, $xml), "$pattern not found in xml. ");
-            // tweak the xml so that settings can be read as attribute (v) and an element.
-            $xml = preg_replace_callback($pattern, function ($m) {
-                return ($m[2] <> 'display_template') ? sprintf("%s v='%s'>%s</setting>", $m[1], $m[3], $m[3]) : $m[0];
+        // for some reason, settings aren't working as expected.
+        $pattern = '|(<setting name="([^"]+)"[^(>$)]*)>([^<]+)</setting>|';
+        assert(preg_match($pattern, $xml), "$pattern not found in xml. ");
+        // tweak the xml so that settings can be read as attribute (v) and an element.
+        $xml = preg_replace_callback($pattern, function ($m) {
+            return ($m[2] <> 'display_template') ? sprintf("%s v='%s'>%s</setting>", $m[1], $m[3], $m[3]) : $m[0];
 //                    dd($matches);
 //                    return strtolower($matches[0]);
-            }, $xml);
+        }, $xml);
 //            $xml = preg_replace('|(<setting[^(>$)]+)>([^<]+)</setting>|', "$1 v=\"$2\">$2</setting>", $xml);
 
 //            $profile->setXml($xml);
 
-            // when xdebug is on, this takes too long to parse.
-            $xmlProfile = $this->parseXml($xml);
-            if ($xmlProfile) {
-                $xmlProfile
+        // when xdebug is on, this takes too long to parse.
+        $xmlProfile = $this->parseXml($xml);
+        if ($xmlProfile) {
+            $xmlProfile
 //                    ->setDescription($xmlProfile->profileDescription)
-                    ->setUiCount(is_countable($xmlProfile->getUserInterfaces()) ? count($xmlProfile->getUserInterfaces()) : 0)
-                    ->setListCount(is_countable($xmlProfile->getLists()) ? count($xmlProfile->getLists()) : 0)
-                    ->setDisplayCount(is_countable($xmlProfile->getDisplays()) ? count($xmlProfile->getDisplays()) : 0)
-                    ->setMdeCount(is_countable($xmlProfile->getElements()) ? count($xmlProfile->getElements()) : 0)
-                    ->setInfoUrl($xmlProfile->infoUrl);
-                try {
-                } catch (\Exception $e) {
-                    $this->logger->error($e->getMessage(), [$profile->getFilename()]);
+                ->setUiCount(is_countable($xmlProfile->getUserInterfaces()) ? count($xmlProfile->getUserInterfaces()) : 0)
+                ->setListCount(is_countable($xmlProfile->getLists()) ? count($xmlProfile->getLists()) : 0)
+                ->setDisplayCount(is_countable($xmlProfile->getDisplays()) ? count($xmlProfile->getDisplays()) : 0)
+                ->setMdeCount(is_countable($xmlProfile->getElements()) ? count($xmlProfile->getElements()) : 0)
+                ->setInfoUrl($xmlProfile->infoUrl);
+            try {
+            } catch (\Exception $e) {
+                $this->logger->error($e->getMessage(), [$profile->getFilename()]);
 //                continue;
-                }
             }
+        }
 
-            // hack, use simpleXml for counts, description
+        // hack, use simpleXml for counts, description
 //            $this->simpleloadXml($profile);
-            if ($updateDatabase) {
-                $this->logger->info("Saving " . $profile->getFilename());
-                $this->entityManager->flush();
-            }
+        if ($updateDatabase) {
+            $this->logger->info("Saving " . $profile->getFilename());
+            $this->entityManager->flush();
+        }
 
-            // map the placements and mdes to the fields, if appropriate
-            /** @var ProfileUserInterface $userInterface */
-            foreach ($xmlProfile->getUserInterfaces() as $userInterface) {
-                /** @var ProfileScreen $screen */
-                foreach ($userInterface->getScreens() as $screen) {
-                    $screen->userInterface = $userInterface;
-                    /** @var ProfilePlacement $placement */
-                    $bundles = [];
-                    foreach ($screen->getPlacements() as $placement) {
-                        if ($bundle = $placement->bundle) {
-                            if (empty($bundles[$bundle])) {
-                                $bundles[$bundle] = [];
-                            }
-//                            dd($placement->settings->setting);
-                            array_push($bundles[$bundle], $placement->settings->asArray());
+        // map the placements and mdes to the fields, if appropriate
+        /** @var ProfileUserInterface $userInterface */
+        foreach ($xmlProfile->getUserInterfaces() as $userInterface) {
+            /** @var ProfileScreen $screen */
+            foreach ($userInterface->getScreens() as $screen) {
+                $screen->userInterface = $userInterface;
+                /** @var ProfilePlacement $placement */
+                $bundles = [];
+                foreach ($screen->getPlacements() as $placement) {
+                    if ($bundle = $placement->bundle) {
+                        if (empty($bundles[$bundle])) {
+                            $bundles[$bundle] = [];
                         }
+//                            dd($placement->settings->setting);
+                        array_push($bundles[$bundle], $placement->settings->asArray());
+                    }
 
-                        $placement->screen = $screen;
-                        $type = str_replace('ca_', '', (string) $userInterface->type);
+                    $placement->screen = $screen;
+                    $type = str_replace('ca_', '', (string)$userInterface->type);
 //                        dd($type,  array_keys($fieldData));
 //                        if (!array_key_exists($type, $fieldData)) {
 //                            dd($type, array_keys($fieldData));
@@ -1338,37 +1338,37 @@ END;
 //                            dd($type, $fieldData);
 //                        }
 
-                        // if it's a relationship table,
+                    // if it's a relationship table,
 //                        dd(array_keys($this->relationshipTables));
-                        if (array_key_exists($type, $this->relationshipTables)) {
-                            continue;
-                        } else {
-                        }
+                    if (array_key_exists($type, $this->relationshipTables)) {
+                        continue;
+                    } else {
+                    }
 
-                        assert(array_key_exists($type, $fieldData), "Missing $type in " . join(',', array_keys($fieldData)));
-                        $code = $placement->code;
-                        if (in_array($code, ['nonpreferred_labels', 'preferred_labels'])) {
+                    assert(array_key_exists($type, $fieldData), "Missing $type in " . join(',', array_keys($fieldData)));
+                    $code = $placement->code;
+                    if (in_array($code, ['nonpreferred_labels', 'preferred_labels'])) {
 //                            dd($type, $fieldData[$type]);
-                            assert(array_key_exists($type, $fieldData), "Missing $type");
+                        assert(array_key_exists($type, $fieldData), "Missing $type");
 //                            assert(array_key_exists('labels', $fieldData[$type]), "Missing labels $type " . dd($type, $fieldData[$type]));
 //                            dump($fieldData[$type], $type);
-                            // arg, entities doesn't have labels...
-                            if (array_key_exists('labels', $fieldData[$type])) {
-                                $placement->setField($fieldData[$type]['labels']);
-                            }
-                            //=                            $placement->setField($fieldData[]);
-                        } else {
-                            if (array_key_exists($code, $fieldData[$type]['fields'])) {
-                                $placement->setField($fieldData[$type]);
+                        // arg, entities doesn't have labels...
+                        if (array_key_exists('labels', $fieldData[$type])) {
+                            $placement->setField($fieldData[$type]['labels']);
+                        }
+                        //=                            $placement->setField($fieldData[]);
+                    } else {
+                        if (array_key_exists($code, $fieldData[$type]['fields'])) {
+                            $placement->setField($fieldData[$type]);
 //                            dd($placement->getField(), $fieldData[$type], $type);
 //                            dd($placement->code, $fieldData[$type], $fieldData[$type]['fields'][$placement->code]);
-                            }
                         }
                     }
-                    $screen->setBundles($bundles);
-//                    dd($bundles);
                 }
+                $screen->setBundles($bundles);
+//                    dd($bundles);
             }
+        }
 //            foreach ($xmlProfile->getElements() as $element) {
 //                dd($element);
 //            }
@@ -1548,7 +1548,7 @@ END;
             // if the field name is handled by the trait, ignore it.
 
             // 'is_enabled', 'is_default',  need these for import.
-            if (in_array($field->getCaFieldName(), ['view_count', 'color', 'icon', 'status', 'parent_id', 'deleted', 'is_enabled', 'is_default','source_info',  'item_value', 'idno', 'idno_sort', 'rank', 'settings'])) {
+            if (in_array($field->getCaFieldName(), ['view_count', 'color', 'icon', 'status', 'parent_id', 'deleted', 'is_enabled', 'is_default', 'source_info', 'item_value', 'idno', 'idno_sort', 'rank', 'settings'])) {
                 $field->setIsIgnored(true);
                 continue;
             }
@@ -1905,7 +1905,7 @@ END;
          * @var string $table
          * @var SystemList $systemList
          */
-        foreach ($core->getKeyTables() as $table=>$systemList) {
+        foreach ($core->getKeyTables() as $table => $systemList) {
             $initStatement = sprintf('$this->%s = new ArrayCollection();', u($systemList->getEntityName())->camel() . 's');
             if (!str_contains($projectPhp, $initStatement)) {
                 $projectPhp = str_replace('// generated-inits', "// generated-inits\n    $initStatement", $projectPhp);
@@ -1930,116 +1930,127 @@ END;
 
 
     private $translationLabels = [];
+
     /** @param ProfileLabel[] */
-    private function addLabels(array $labels, $el)// string $code, string $componentType)
+    private function addLabels(XmlLabelsInterface $el)// string $code, string $componentType)
     {
-        dd($el);
-        foreach($labels as $label) {
-            $this->translationLabels[$label->locale][$componentType . '.' . $code . '.name'] = $label->name;
-            $this->translationLabels[$label->locale][$componentType . '.' . $code . '.name'] = $label->name;
-            $this->translationLabels[$label->locale][$componentType . '.' . $code . '.description'] = $label->description;
+        foreach ($el->getLabels() as $label) {
+//            dd($el, $el->_label());
+            $this->translationLabels[$label->locale][$el->_label()] = $label->name;
+            if ($label->description) {
+                $el->setHasDescription(true);
+                $this->translationLabels[$label->locale][$el->_description()] = $label->description;
+            }
+//            $this->translationLabels[$label->locale][$componentType . '.' . $code . '.name'] = $label->name;
+//            $this->translationLabels[$label->locale][$componentType . '.' . $code . '.description'] = $label->description;
         }
+//        dd($this->translationLabels);
     }
 
     public function loadLabelsFromXml(XmlProfile $profile): array
     {
+        $locales = [];
         // really we should implement a LabelsInterface, then just get the right classes.s
         foreach ($profile->getLocales() as $locale) {
 //        $localMap = ['en' => 'en_US', 'fr' => 'fr_FR'];
-        $localeCode = $locale->lang . '_' . $locale->country; // 'en_US'; // @todo: get from xml
-        /** @var ProfileUserInterface $ui */
-        foreach ($profile->getUserInterfaces() as $ui) {
+            $localeCode = $locale->lang . '_' . $locale->country; // 'en_US'; // @todo: get from xml
+            /** @var ProfileUserInterface $ui */
+            foreach ($profile->getUserInterfaces() as $ui) {
 
-            $labels = $ui->getLabels();
+//                $labels = $ui->getLabels();
 
 //            $labels = array_filter($ui->getLabels(), fn (ProfileLabel $label) => $label->locale == 'en_US');
 //                dump($labels);
-            $this->addLabels($labels, $ui); //  $ui->code, 'ui');
-            if ($l = array_pop($labels)) {
-                $translations[$ui->_label()] = $l->name;
-                $translations[$ui->_description()] = $l->description ?: " ";
-            }
+                $this->addLabels($ui); //  $ui->code, 'ui');
+//                if ($l = array_pop($labels)) {
+//                    $translations[$ui->_label()] = $l->name;
+//                    if ($l->description) {
+//
+//                    }
+//                    $translations[$ui->_description()] = $l->description ?: " ";
+//                }
 
-            /** @var ProfileScreen $screen */
-            foreach ($ui->getScreens() as $screen) {
-                $labels = array_filter($screen->getLabels());
+                /** @var ProfileScreen $screen */
+                foreach ($ui->getScreens() as $screen) {
+                    $this->addLabels($screen); //  $ui->code, 'ui');
 
-                if ($l = array_pop($labels)) {
-                    $translations[$screen->_label()] = $l->name;
-                    $translations[$screen->_description()] = $l->description ?: " ";
-                }
+//                    $labels = array_filter($screen->getLabels());
+//
+//                    if ($l = array_pop($labels)) {
+//                        $translations[$screen->_label()] = $l->name;
+//                        $translations[$screen->_description()] = $l->description ?: " ";
+//                    }
 //                    dd($l, $translations);
+                }
             }
-        }
 //            dd($translations);
 
-        /** @var ProfileLists $list */
-        foreach ($profile->getLists() as $list) {
-            $labels = $list->getLabels();
-//            $labels = array_filter($list->getLabels(), fn (ProfileLabel $label) => $label->locale == $locale);
-            if ($l = array_pop($labels)) {
-                $translations[$list->_label()] = html_entity_decode((string) $l->name);
-                $translations[$list->_description()] = html_entity_decode((string) $l->description) ?: " ";
-            }
+            /** @var ProfileLists $list */
+            foreach ($profile->getLists() as $list) {
+                $this->addLabels($list);
+//                $labels = $list->getLabels();
+////            $labels = array_filter($list->getLabels(), fn (ProfileLabel $label) => $label->locale == $locale);
+//                if ($l = array_pop($labels)) {
+//                    $translations[$list->_label()] = html_entity_decode((string)$l->name);
+//                    $translations[$list->_description()] = html_entity_decode((string)$l->description) ?: " ";
+//                }
 //                dump($list);
-            foreach ($list->getItems() as $item) {
-                $labels = $item->getLabels();
-//                $labels = array_filter($item->getLabels(), fn (ProfileLabel $label) => $label->locale == $locale);
-                if ($l = array_pop($labels)) {
-                    $translations[$item->_t($list)] = $l->name ?: $l->name_singular;
-//                        $translations[$item->_label()] = $l->name;
-                    assert(empty($l->description), "Item has description");
-//                        $translations[$item->_description()] = $l->description;
+                foreach ($list->getItems() as $item) {
+                    $this->addLabels($item);
+//                    $labels = $item->getLabels();
+////                $labels = array_filter($item->getLabels(), fn (ProfileLabel $label) => $label->locale == $locale);
+//                    if ($l = array_pop($labels)) {
+//                        $translations[$item->_t($list)] = $l->name ?: $l->name_singular;
+////                        $translations[$item->_label()] = $l->name;
+//                        assert(empty($l->description), "Item has description");
+////                        $translations[$item->_description()] = $l->description;
+//                    }
                 }
             }
-        }
 
-        foreach ($profile->getRelationshipTables() as $table) {
-            /** @var ProfileRelationshipTableType $element */
-            foreach ($table->getTypes() as $element) {
-                $labels = array_filter($element->getLabels(), fn (ProfileLabel $label) => $label->locale == $locale);
-                if ($l = array_pop($labels)) {
-                    $translations[$element->_label()] = $l->name;
-                    $translations[$element->_description()] = $l->description;
-                    $translations[$element->_typename()] = $l->typename;
-                    $translations[$element->_typename_reverse()] = $l->typename_reverse;
-                }
-            }
-        }
-
-        foreach (['getElements'] as $method) {
-            /** @var ProfileMetaDataElement $element */
-            foreach ($profile->{$method}() as $element) {
-                $labels = array_filter($element->getLabels(), fn (ProfileLabel $label) => $label->locale == $locale);
-                if ($l = array_pop($labels)) {
-                    $translations[$element->_label()] = $l->name;
-                    $translations[$element->_description()] = $l->description ?: ' ';
-                }
-
-                // it might be nested
-                if (!empty($element->elements)) {
-                    foreach ($element->getElements() as $nestedElement) {
-                        $labels = array_filter($nestedElement->getLabels(), fn (ProfileLabel $label) => $label->locale == $locale);
-                        if ($l = array_pop($labels)) {
-                            $translations[$element->_label()] = $l->name;
-                            $translations[$element->_description()] = $l->description ?: ' ';
-                        }
+            foreach ($profile->getRelationshipTables() as $table) {
+                /** @var ProfileRelationshipTableType $element */
+                foreach ($table->getTypes() as $element) {
+                    $labels = array_filter($element->getLabels(), fn(ProfileLabel $label) => $label->locale == $locale);
+                    if ($l = array_pop($labels)) {
+                        $translations[$element->_label()] = $l->name;
+                        $translations[$element->_description()] = $l->description;
+                        $translations[$element->_typename()] = $l->typename;
+                        $translations[$element->_typename_reverse()] = $l->typename_reverse;
                     }
                 }
+            }
+
+            foreach (['getElements'] as $method) {
+                /** @var ProfileMetaDataElement $element */
+                foreach ($profile->{$method}() as $element) {
+                    $this->addLabels($element);
+//                    $labels = array_filter($element->getLabels(), fn(ProfileLabel $label) => $label->locale == $locale);
+//                    if ($l = array_pop($labels)) {
+//                        $translations[$element->_label()] = $l->name;
+//                        $translations[$element->_description()] = $l->description ?: ' ';
+//                    }
+
+                    // it might be nested
+                    if (!empty($element->elements)) {
+                        foreach ($element->getElements() as $nestedElement) {
+                            $labels = array_filter($nestedElement->getLabels(), fn(ProfileLabel $label) => $label->locale == $locale);
+                            if ($l = array_pop($labels)) {
+                                $translations[$element->_label()] = $l->name;
+                                $translations[$element->_description()] = $l->description ?: ' ';
+                            }
+                        }
+                    }
 
 
 //                    {% for e in mde.elements %}
 //                    <li>{{ e.value.code }} <i>{{ e.value.datatype }} {{ e.value._label|trans }}</i></li>
 //{{ dump(e.value) }}
 //                        {% endfor %}
+                }
             }
         }
-        $locales[$localeCode] = $translations;
-        dd($localeCode, $translations);
-        }
-
-
-        return $translations;
+        return $this->translationLabels;
         // maybe use xpath to get all the Labels?
     }
 
@@ -2059,6 +2070,7 @@ END;
         }
         return $map;
     }
+
     public function createTranslations()
     {
         $trans = [];
@@ -2086,7 +2098,7 @@ END;
             $profile = $p->getXmlProfile();
             /** @var ProfileUserInterface $ui */
             foreach ($profile->getUserInterfaces() as $ui) {
-                $labels = array_filter($ui->getLabels(), fn (ProfileLabel $label) => $label->locale == 'en_US');
+                $labels = array_filter($ui->getLabels(), fn(ProfileLabel $label) => $label->locale == 'en_US');
 //                dump($labels);
                 if ($l = array_pop($labels)) {
                     $translations[$ui->_label()] = $l->name;
@@ -2095,7 +2107,7 @@ END;
 
                 /** @var ProfileScreen $screen */
                 foreach ($ui->getScreens() as $screen) {
-                    $labels = array_filter($screen->getLabels(), fn (ProfileLabel $label) => $label->locale == 'en_US');
+                    $labels = array_filter($screen->getLabels(), fn(ProfileLabel $label) => $label->locale == 'en_US');
 
                     if ($l = array_pop($labels)) {
                         $translations[$screen->_label()] = $l->name;
@@ -2108,14 +2120,14 @@ END;
 
             /** @var ProfileLists $list */
             foreach ($profile->getLists() as $list) {
-                $labels = array_filter($list->getLabels(), fn (ProfileLabel $label) => $label->locale == $locale);
+                $labels = array_filter($list->getLabels(), fn(ProfileLabel $label) => $label->locale == $locale);
                 if ($l = array_pop($labels)) {
-                    $translations[$list->_label()] = html_entity_decode((string) $l->name);
-                    $translations[$list->_description()] = html_entity_decode((string) $l->description) ?: " ";
+                    $translations[$list->_label()] = html_entity_decode((string)$l->name);
+                    $translations[$list->_description()] = html_entity_decode((string)$l->description) ?: " ";
                 }
 //                dump($list);
                 foreach ($list->getItems() as $item) {
-                    $labels = array_filter($item->getLabels(), fn (ProfileLabel $label) => $label->locale == $locale);
+                    $labels = array_filter($item->getLabels(), fn(ProfileLabel $label) => $label->locale == $locale);
                     if ($l = array_pop($labels)) {
                         $translations[$item->_t($list)] = $l->name ?: $l->name_singular;
 //                        $translations[$item->_label()] = $l->name;
@@ -2128,7 +2140,7 @@ END;
             foreach ($profile->getRelationshipTables() as $table) {
                 /** @var ProfileRelationshipTableType $element */
                 foreach ($table->getTypes() as $element) {
-                    $labels = array_filter($element->getLabels(), fn (ProfileLabel $label) => $label->locale == $locale);
+                    $labels = array_filter($element->getLabels(), fn(ProfileLabel $label) => $label->locale == $locale);
                     if ($l = array_pop($labels)) {
                         $translations[$element->_label()] = $l->name;
                         $translations[$element->_description()] = $l->description;
@@ -2141,7 +2153,7 @@ END;
             foreach (['getElements'] as $method) {
                 /** @var ProfileMetaDataElement $element */
                 foreach ($profile->{$method}() as $element) {
-                    $labels = array_filter($element->getLabels(), fn (ProfileLabel $label) => $label->locale == $locale);
+                    $labels = array_filter($element->getLabels(), fn(ProfileLabel $label) => $label->locale == $locale);
                     if ($l = array_pop($labels)) {
                         $translations[$element->_label()] = $l->name;
                         $translations[$element->_description()] = $l->description ?: ' ';
@@ -2150,7 +2162,7 @@ END;
                     // it might be nested
                     if (!empty($element->elements)) {
                         foreach ($element->getElements() as $nestedElement) {
-                            $labels = array_filter($nestedElement->getLabels(), fn (ProfileLabel $label) => $label->locale == $locale);
+                            $labels = array_filter($nestedElement->getLabels(), fn(ProfileLabel $label) => $label->locale == $locale);
                             if ($l = array_pop($labels)) {
                                 $translations[$element->_label()] = $l->name;
                                 $translations[$element->_description()] = $l->description ?: ' ';
