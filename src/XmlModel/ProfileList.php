@@ -31,7 +31,7 @@ class ProfileList implements XmlLabelsInterface
         return $this->code;
     }
 
-    public function _label() { return sprintf("%s.%s", 'list', $this->getCode()); }
+    public function _label(): string { return sprintf("%s.%s", 'list', $this->getCode()); }
 
 
 }

@@ -1931,16 +1931,45 @@ END;
 
     private $translationLabels = [];
 
+    private function addLabel(XmlLabelsInterface $el, string $key, ?string $value, string $language, string $locale)
+    {
+        // if it already exists, and it's different, we need to create a special override
+        if ($existing = $this->translationLabels[$language][$key] ?? false) {
+            if ($existing <> $value) {
+                $this->translationLabels[$locale][$key] = $value;
+            }
+        }
+        $this->translationLabels[$language][$key] = $value;
+    }
+
     /** @param ProfileLabel[] */
     private function addLabels(XmlLabelsInterface $el)// string $code, string $componentType)
     {
         foreach ($el->getLabels() as $label) {
+            $locale = $label->locale;
+            [$language, $countryCode] = explode('_', $locale);
+            $this->addLabel($el, $el->_label(), $label->name, $language, $locale);
+
+
 //            dd($el, $el->_label());
-            $this->translationLabels[$label->locale][$el->_label()] = $label->name;
+//            $this->translationLabels[$label->locale][$el->_label()] = $label->name;
             if ($label->description) {
+//                assert(empty($label->description), $el->_description() . ' ' . $label->description);
                 $el->setHasDescription(true);
-                $this->translationLabels[$label->locale][$el->_description()] = $label->description;
+                $this->addLabel($el, $el->_description(), $label->description, $language, $locale);
+                assert($el->hasDescription());
+//                $this->translationLabels[$label->locale][$el->_description()] = $label->description;
             }
+
+            if ($el->_typename()) {
+                $this->addLabel($el, $el->_typename(), $label->typename, $language, $locale);
+            }
+            if ($el->_typename_reverse()) {
+                $this->addLabel($el, $el->_typename_reverse(), $label->typename_reverse, $language, $locale);
+//                $translations[$label->locale][$el->_typename_reverse()] = $label->typename_reverse;
+//                dd($el, $label, $el->_typename());
+            }
+
 //            $this->translationLabels[$label->locale][$componentType . '.' . $code . '.name'] = $label->name;
 //            $this->translationLabels[$label->locale][$componentType . '.' . $code . '.description'] = $label->description;
         }
@@ -1956,68 +1985,26 @@ END;
             $localeCode = $locale->lang . '_' . $locale->country; // 'en_US'; // @todo: get from xml
             /** @var ProfileUserInterface $ui */
             foreach ($profile->getUserInterfaces() as $ui) {
-
-//                $labels = $ui->getLabels();
-
-//            $labels = array_filter($ui->getLabels(), fn (ProfileLabel $label) => $label->locale == 'en_US');
-//                dump($labels);
                 $this->addLabels($ui); //  $ui->code, 'ui');
-//                if ($l = array_pop($labels)) {
-//                    $translations[$ui->_label()] = $l->name;
-//                    if ($l->description) {
-//
-//                    }
-//                    $translations[$ui->_description()] = $l->description ?: " ";
-//                }
-
                 /** @var ProfileScreen $screen */
                 foreach ($ui->getScreens() as $screen) {
                     $this->addLabels($screen); //  $ui->code, 'ui');
-
-//                    $labels = array_filter($screen->getLabels());
-//
-//                    if ($l = array_pop($labels)) {
-//                        $translations[$screen->_label()] = $l->name;
-//                        $translations[$screen->_description()] = $l->description ?: " ";
-//                    }
-//                    dd($l, $translations);
                 }
             }
-//            dd($translations);
 
             /** @var ProfileLists $list */
             foreach ($profile->getLists() as $list) {
                 $this->addLabels($list);
-//                $labels = $list->getLabels();
-////            $labels = array_filter($list->getLabels(), fn (ProfileLabel $label) => $label->locale == $locale);
-//                if ($l = array_pop($labels)) {
-//                    $translations[$list->_label()] = html_entity_decode((string)$l->name);
-//                    $translations[$list->_description()] = html_entity_decode((string)$l->description) ?: " ";
-//                }
-//                dump($list);
                 foreach ($list->getItems() as $item) {
                     $this->addLabels($item);
-//                    $labels = $item->getLabels();
-////                $labels = array_filter($item->getLabels(), fn (ProfileLabel $label) => $label->locale == $locale);
-//                    if ($l = array_pop($labels)) {
-//                        $translations[$item->_t($list)] = $l->name ?: $l->name_singular;
-////                        $translations[$item->_label()] = $l->name;
-//                        assert(empty($l->description), "Item has description");
-////                        $translations[$item->_description()] = $l->description;
-//                    }
                 }
             }
 
             foreach ($profile->getRelationshipTables() as $table) {
                 /** @var ProfileRelationshipTableType $element */
                 foreach ($table->getTypes() as $element) {
-                    $labels = array_filter($element->getLabels(), fn(ProfileLabel $label) => $label->locale == $locale);
-                    if ($l = array_pop($labels)) {
-                        $translations[$element->_label()] = $l->name;
-                        $translations[$element->_description()] = $l->description;
-                        $translations[$element->_typename()] = $l->typename;
-                        $translations[$element->_typename_reverse()] = $l->typename_reverse;
-                    }
+//                    $labels = array_filter($element->getLabels(), fn(ProfileLabel $label) => $label->locale == $locale);
+                    $this->addLabels($element);
                 }
             }
 
@@ -2025,28 +2012,12 @@ END;
                 /** @var ProfileMetaDataElement $element */
                 foreach ($profile->{$method}() as $element) {
                     $this->addLabels($element);
-//                    $labels = array_filter($element->getLabels(), fn(ProfileLabel $label) => $label->locale == $locale);
-//                    if ($l = array_pop($labels)) {
-//                        $translations[$element->_label()] = $l->name;
-//                        $translations[$element->_description()] = $l->description ?: ' ';
-//                    }
-
-                    // it might be nested
+                    // it might be nested.  @todo: check for recursive.
                     if (!empty($element->elements)) {
                         foreach ($element->getElements() as $nestedElement) {
-                            $labels = array_filter($nestedElement->getLabels(), fn(ProfileLabel $label) => $label->locale == $locale);
-                            if ($l = array_pop($labels)) {
-                                $translations[$element->_label()] = $l->name;
-                                $translations[$element->_description()] = $l->description ?: ' ';
-                            }
+                            $this->addLabels($nestedElement);
                         }
                     }
-
-
-//                    {% for e in mde.elements %}
-//                    <li>{{ e.value.code }} <i>{{ e.value.datatype }} {{ e.value._label|trans }}</i></li>
-//{{ dump(e.value) }}
-//                        {% endfor %}
                 }
             }
         }

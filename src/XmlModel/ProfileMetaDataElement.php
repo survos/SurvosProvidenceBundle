@@ -20,7 +20,7 @@ class ProfileMetaDataElement implements XmlLabelsInterface
         $this->settings = new ProfileSettings();
     }
 
-    public function _label() { return sprintf("%s.%s", 'mde', $this->getCode()); }
+    public function _label(): string { return sprintf("%s.%s", 'mde', $this->getCode()); }
     public function getSettings() { return $this->settings->setting; }
     public function getElements() { return $this->elements->metadataElement; }
 

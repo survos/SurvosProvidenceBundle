@@ -22,7 +22,7 @@ class ProfileUserInterface implements XmlLabelsInterface
         return $this->screens->screen;
     }
 
-    public function _label() { return sprintf("%s.%s", 'ui', $this->getCode()); }
+    public function _label(): string { return sprintf("%s.%s", 'ui', $this->getCode()); }
 
 
 }

@@ -3,11 +3,10 @@
 namespace Survos\Providence\XmlModel;
 
 
-class ProfileRelationshipTableType
+class ProfileRelationshipTableType implements XmlLabelsInterface
 {
     use XmlAttributesTrait;
     use XmlLabelsTrait;
-
 
     public $default;
     public $subTypeLeft;
@@ -17,10 +16,12 @@ class ProfileRelationshipTableType
         return (string)$this->code;
     }
 
-    public function _label() { return sprintf("%s.%s", 'rt', $this->getCode()); }
+    protected const _TRANSLATION_KEY = 'rt';
 
-    public function _typename() { return sprintf("%s.%s.typename", 'rel', $this->getCode()); }
-    public function _typename_reverse() { return sprintf("%s.%s.typename_reverse", 'rel', $this->getCode()); }
+    public function _label(): string { return sprintf("%s.%s", 'rt', $this->getCode()); }
+
+    public function _typename(): ?string { return sprintf("%s.%s.typename", 'rel', $this->getCode()); }
+    public function _typename_reverse(): ?string { return sprintf("%s.%s.typename_reverse", 'rel', $this->getCode()); }
 
 
 

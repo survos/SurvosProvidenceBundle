@@ -23,7 +23,7 @@ class ProfileScreen implements XmlLabelsInterface
         return $this->idno;
     }
 
-    public function _label() { return sprintf("%s.%s", 'screen', $this->getCode()); }
+    public function _label(): string { return sprintf("%s.%s", 'screen', $this->getCode()); }
 
     public function getPlacements() { return $this->bundlePlacements->placement; }
     public function getBundles(): array {

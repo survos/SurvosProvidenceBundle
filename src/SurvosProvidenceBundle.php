@@ -9,6 +9,7 @@ use Survos\Providence\Twig\TwigExtension;
 use Survos\Providence\XmlModel\XmlProfile;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
@@ -25,6 +26,13 @@ class SurvosProvidenceBundle extends AbstractBundle
 //            ->setArgument('$registry', new Reference('doctrine'))
             ->setArgument('$logger', new Reference('logger'))
             ->addTag('console.command')
+        ;
+
+        $builder
+            ->setDefinition('survos.prov_twig', new Definition(TwigExtension::class))
+            ->addTag('twig.extension')
+//            ->setPublic(false)
+            ->setArgument('$translator', new Reference('translator'))
         ;
 
         $builder
