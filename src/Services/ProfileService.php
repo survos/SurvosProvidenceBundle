@@ -290,7 +290,7 @@ class ProfileService
         return $core ?: null;
     }
 
-    public function parseXml($input): XmlProfile
+    public function parseXml($input, $profileClassName = XmlProfile::class): XmlProfile
     {
         // <article xmlns="http://example.org/">
         if (empty($input)) {
@@ -328,7 +328,7 @@ XML_WRAP;
         //dd($input);
         $service = new XmlParser();
         $service->namespaceMap['http://www.w3.org/2001/XMLSchema-instance'] = 'profile';
-        $service->mapValueObject('{}profile', XmlProfile::class);
+        $service->mapValueObject('{}profile', $profileClassName);
         /** @var XmlProfile $profile */
         $profile = $service->parse($input);
 //        dd($profile->elementSets->metadataElement[0]->typeRestrictions->restriction[0]->settings->setting[0]);
@@ -464,6 +464,7 @@ XML_WRAP;
         //        $core = $this->getCore('NestedListItem'); // we probably don't need this anymore!
         $entityName = $sysList->getEntityName();
 
+
         if (!$sysList->getUsedBy()) {
 //            dd("not used by anything: " . $sysList->getEntityName());
 //            return []   ; // @todo: handle statuses and sources
@@ -472,7 +473,8 @@ XML_WRAP;
 
         $code = $this->twig->render(
             "php/ListItemEntity.php.twig",
-            [
+            $renderVars = [
+                'filename' => "/src/Entity/$entityName",
                 'core' => (new Core())->setEntityName($entityName), // hack to get plural.
                 'entityName' => $entityName,
                 'systemList' => $sysList,
@@ -485,16 +487,20 @@ XML_WRAP;
         $map = $this->getMapping()['systemLists'][str_replace('ca_', '', $sysList->getCode())];
 //        dd($map);
         // the name of this now needs to map to a new entity type, same fields as NestedListItems
-        $repoCode = $this->twig->render("php/repo.php.twig", ['entityName' => $entityName]);
+        $repoFilename = "/src/Repository/${entityName}Repository.php";
+
+        $repoCode = $this->twig->render("php/repo.php.twig", [
+            'filename' => $repoFilename,
+            'entityName' => $entityName]);
 
         $core = $sysList->getUsedBy();
 //            assert($core, $entityName . " is not used by anything");
 
         if (!empty($core)) {
-            $traitCode = $this->twig->render("php/trait.php.twig", [
+            $traitCode = $this->twig->render("php/trait.php.twig", $entityVars = [
                 'core' => $core, // the used by
+                'filename' => sprintf('/src/Traits/Project%s.php', $core->getEntityName()),
                 'entityName' => $entityName,
-
                 'privateVar' => u($entityName . 's')->camel() // type, source, label
 //            // hack!
 //            'core' => $core = (new Core())
@@ -513,9 +519,8 @@ XML_WRAP;
 
 
         if ($path = $options['path']) {
-            file_put_contents($fn = "$path/src/Entity/$entityName.php", $code);
-            if (!empty($traitCode)) file_put_contents($fn = sprintf("$path/src/Traits/Project%s.php", $core->getEntityName()), $traitCode);
-            file_put_contents($fn = "$path/src/Repository/${entityName}Repository.php", $repoCode);
+            if (!empty($traitCode)) file_put_contents($fn = sprintf($path . $entityVars['filename']), $traitCode);
+            file_put_contents($fn = $path . $repoFilename, $repoCode);
         }
         $sysList
             ->setTraitCode($traitCode)
@@ -1269,7 +1274,7 @@ END;
         return $profiles;
     }
 
-    public function loadXml(string $xml, $updateDatabase = false): XmlProfile
+    public function loadXml(string $xml, string $profileClassName=XmlProfile::class): XmlProfile
     {
         $fieldData = $this->getCaBaseModelData();
 
@@ -1305,10 +1310,10 @@ END;
 
         // hack, use simpleXml for counts, description
 //            $this->simpleloadXml($profile);
-        if ($updateDatabase) {
-            $this->logger->info("Saving " . $profile->getFilename());
-            $this->entityManager->flush();
-        }
+//        if ($updateDatabase) {
+//            $this->logger->info("Saving " . $profile->getFilename());
+//            $this->entityManager->flush();
+//        }
 
         // map the placements and mdes to the fields, if appropriate
         /** @var ProfileUserInterface $userInterface */
@@ -1373,78 +1378,6 @@ END;
 //                dd($element);
 //            }
         return $xmlProfile;
-    }
-
-    /** @deprecated */
-    private function loadViaSimpleXml(SplFileInfo $fileInfo, \App\Entity\Profile $profile)
-    {
-        $profiles = null;
-        // do we need the raw XML?
-        $xml = simplexml_load_file($fileInfo->getPathname());
-        $rawData = json_decode(json_encode($xml, JSON_THROW_ON_ERROR), true, 512, JSON_THROW_ON_ERROR);
-
-        foreach ($rawData as $wrapper => $actualData) {
-            if (is_array($actualData) && count($actualData) === 1) {
-                $key = array_key_first($actualData);
-
-                /*
-                $nestedData = $actualData[$key];
-                foreach ($nestedData as $nestedWrapper=>$nextLevel)
-                if (is_array($nextLevel) && count($nextLevel) === 1) {
-                    $nestedKey = array_key_first($nextLevel);
-                    $nestedData[$nestedWrapper] = $nestedData[$nestedKey];
-                }
-                */
-
-                $rawData[$wrapper] = $actualData[$key];
-            }
-        }
-        assert(is_array($rawData['@attributes']), json_encode($rawData['@attributes'], JSON_THROW_ON_ERROR));
-        $profile
-//                ->setAttributes($rawData['@attributes'])
-            ->setName($rawData['profileName'])
-            ->setDescription(is_array($rawData['profileDescription']) ? null : $rawData['profileDescription'])
-            ->setRawData($rawData);
-
-        // get the elements and type restrictions
-//            dd($rawData['elementSets']);
-        foreach ($rawData['elementSets']['metadataElement'] as $mdeData) {
-            $mde = (new MetaDataElement())
-                ->setAttributes($mdeData['@attributes']);
-
-            $profile->addMetaDataElement($mde);
-            dd($mde, $mdeData);
-        }
-        $this->entityManager->flush();
-        array_push($profiles, $profile);
-        dd($profile, $rawData);
-//            return $profiles;
-        $this->entityManager->flush();
-    }
-
-    /** @deprecated */
-    private function simpleloadXml(EntityProfile $profile)
-    {
-        try {
-            $xml = simplexml_load_string($profile->getXml());
-        } catch (\Exception $e) {
-            $this->logger->error($e->getMessage(), [$profile->getFilename()]);
-            return;
-        }
-        $rawData = json_decode(json_encode($xml, JSON_THROW_ON_ERROR), true, 512, JSON_THROW_ON_ERROR);
-        $desc = $rawData['profileDescription'];
-        $mde = $rawData['elementSets']['metadataElement'];
-        $profile
-            ->setName($rawData['profileName'])
-            ->setMdeCount(is_countable($mde) ? count($mde) : 0)
-            ->setUiCount(is_countable($rawData['userInterfaces']['userInterface']) ? count($rawData['userInterfaces']['userInterface']) : 0)
-            ->setListCount(is_countable($rawData['lists']['list']) ? count($rawData['lists']['list']) : 0)
-            ->setRawData($rawData);
-        if (is_string($desc)) {
-            $profile->setDescription($desc);
-        }
-
-        $this->logger->info("UIs", [$profile->getFilename(), is_countable($rawData['userInterfaces']['userInterface']) ? count($rawData['userInterfaces']['userInterface']) : 0]);
     }
 
     private function remainingKeys($x = null): array
@@ -1852,6 +1785,7 @@ END;
             'repo' => $repo,
             'entityName' => $entityName,
             'tableName' => $tableName,
+            'filename' => sprintf('/src/Traits/Project%s.php', $core->getEntityName()),
             'core' => $core,
             'privateVar' => u($entityName . 's')->camel(), // type, source, label, this doesn't seem quite right.
             'fields' => $core->getFields(),
@@ -1873,7 +1807,7 @@ END;
         if ($path = $options['path']) {
             $classFilename = "$path/src/Entity/$entityName.php";
             file_put_contents($classFilename, $entityCode);
-            $repoFilename = "$path/src/Repository/${entityName}Repository.php";
+            $repoFilename = $path . $enityVars['filename'];
             file_put_contents($repoFilename, $repoCode);
 
             $traitFilename = sprintf("$path/src/Traits/Project%s.php", $core->getEntityName());
@@ -1909,10 +1843,14 @@ END;
             $initStatement = sprintf('$this->%s = new ArrayCollection();', u($systemList->getEntityName())->camel() . 's');
             if (!str_contains($projectPhp, $initStatement)) {
                 $projectPhp = str_replace('// generated-inits', "// generated-inits\n    $initStatement", $projectPhp);
-
                 file_put_contents($fn, $projectPhp);
             }
         }
+        $projectPhp = str_replace('use Traits\ProjectListItem;', "// use Traits\ProjectListItem;", $projectPhp);
+        file_put_contents($fn, $projectPhp);
+
+        // hack, something is out-of-sync with ProjectList and NestedList traits
+
 
         //            dd($trait, $projectPhp, $entityName);
 //        }
@@ -1933,7 +1871,10 @@ END;
 
     private function addLabel(XmlLabelsInterface $el, string $key, ?string $value, string $language, string $locale)
     {
-        // if it already exists, and it's different, we need to create a special override
+        if (!$value) {
+            return;
+        }
+        // if it already exists, and it's different than the lang, create a special override in the lang_COUNTRY file.
         if ($existing = $this->translationLabels[$language][$key] ?? false) {
             if ($existing <> $value) {
                 $this->translationLabels[$locale][$key] = $value;
@@ -1943,37 +1884,30 @@ END;
     }
 
     /** @param ProfileLabel[] */
-    private function addLabels(XmlLabelsInterface $el)// string $code, string $componentType)
+    private function addLabels(XmlLabelsInterface $el)
     {
         foreach ($el->getLabels() as $label) {
             $locale = $label->locale;
             [$language, $countryCode] = explode('_', $locale);
-            $this->addLabel($el, $el->_label(), $label->name, $language, $locale);
-
-
-//            dd($el, $el->_label());
-//            $this->translationLabels[$label->locale][$el->_label()] = $label->name;
-            if ($label->description) {
-//                assert(empty($label->description), $el->_description() . ' ' . $label->description);
-                $el->setHasDescription(true);
-                $this->addLabel($el, $el->_description(), $label->description, $language, $locale);
-                assert($el->hasDescription());
-//                $this->translationLabels[$label->locale][$el->_description()] = $label->description;
+            // relationship Types don't have a name, just typename and typename_reverse
+            if ($label->name) {
+                $this->addLabel($el, $el->_label(), $label->name, $language, $locale);
             }
 
+            if ($label->description) {
+                $this->addLabel($el, $el->_description(), $label->description, $language, $locale);
+            }
+
+            // if it's a relationshipType.
             if ($el->_typename()) {
                 $this->addLabel($el, $el->_typename(), $label->typename, $language, $locale);
-            }
-            if ($el->_typename_reverse()) {
                 $this->addLabel($el, $el->_typename_reverse(), $label->typename_reverse, $language, $locale);
-//                $translations[$label->locale][$el->_typename_reverse()] = $label->typename_reverse;
-//                dd($el, $label, $el->_typename());
             }
+//            if ($el->_typename_reverse()) {
+//                $this->addLabel($el, $el->_typename_reverse(), $label->typename_reverse, $language, $locale);
+//            }
 
-//            $this->translationLabels[$label->locale][$componentType . '.' . $code . '.name'] = $label->name;
-//            $this->translationLabels[$label->locale][$componentType . '.' . $code . '.description'] = $label->description;
         }
-//        dd($this->translationLabels);
     }
 
     public function loadLabelsFromXml(XmlProfile $profile): array
@@ -2003,7 +1937,6 @@ END;
             foreach ($profile->getRelationshipTables() as $table) {
                 /** @var ProfileRelationshipTableType $element */
                 foreach ($table->getTypes() as $element) {
-//                    $labels = array_filter($element->getLabels(), fn(ProfileLabel $label) => $label->locale == $locale);
                     $this->addLabels($element);
                 }
             }
@@ -2022,7 +1955,6 @@ END;
             }
         }
         return $this->translationLabels;
-        // maybe use xpath to get all the Labels?
     }
 
     public function createDemoMap(): array

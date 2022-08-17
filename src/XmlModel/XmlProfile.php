@@ -157,6 +157,9 @@ class XmlProfile
     /** @returns ProfileRelationshipTable[] */
     public function getRelationshipTypes(): array { return $this->relationshipTypes ? $this->relationshipTypes->relationshipTable: []; }
 
+    /** @returns int */
+    public function getRelationshipTypesCount(): int { return $this->relationshipTypes ? count($this->relationshipTypes->relationshipTable): 0; }
+
     public function ElementsByRestriction(): array {
         $summary = [];
         /** @var ProfileMetaDataElement $element */

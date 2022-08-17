@@ -10,6 +10,10 @@ class ProfileRelationshipTableTypes
 
     /** @var ProfileRelationshipTypes[] */
     public $type = [];
+    public string $subTypeLeft;
+    public string $subTypeRight;
+
+
 
 //    public function getTypes()
 //    {
