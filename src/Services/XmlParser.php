@@ -112,7 +112,7 @@ class XmlParser extends \Sabre\Xml\Service
     }
 
     // from the parent
-    public function mapValueObject(string $elementName, string $className)
+    public function mapValueObject(string $elementName, string $className): void
     {
         [$namespace] = self::parseClarkNotation($elementName);
 
