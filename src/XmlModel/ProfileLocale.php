@@ -2,7 +2,7 @@
 
 namespace Survos\Providence\XmlModel;
 
-class ProfileLocale
+class ProfileLocale implements \Stringable
 {
     use XmlAttributesTrait;
 //    use XmlLabelsTrait;
@@ -13,7 +13,7 @@ class ProfileLocale
         return sprintf('%s_%s', $this->lang, $this->country); // $this->code;
     }
 
-    public function _label() { return sprintf("%s.%s", 'list', $this->getCode()); }
+    public function _label(): string { return sprintf("%s.%s", 'list', $this->getCode()); }
 
 
 }

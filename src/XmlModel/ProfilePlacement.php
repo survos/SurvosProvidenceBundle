@@ -24,10 +24,9 @@ class ProfilePlacement
     }
 
     /**
-     * @param mixed $field
      * @return ProfilePlacement
      */
-    public function setField($field) {
+    public function setField(mixed $field) {
         $this->field = $field;
         return $this;
     }

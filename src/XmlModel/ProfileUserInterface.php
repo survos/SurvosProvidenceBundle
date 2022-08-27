@@ -10,13 +10,13 @@ class ProfileUserInterface implements XmlLabelsInterface
     use XmlAttributesTrait;
     use XmlLabelsTrait;
 
-    public const LABEL_PREFIX = 'ui';
+    final public const LABEL_PREFIX = 'ui';
 
     public $type;
 
     public ProfileScreens $screens;
 
-    /** @returns ProfileScreen[] */
+    /** @return ProfileScreen[] */
     public function getScreens(): array
     {
         return $this->screens->screen;

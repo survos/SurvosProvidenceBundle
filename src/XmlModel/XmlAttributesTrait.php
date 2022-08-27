@@ -40,7 +40,7 @@ trait XmlAttributesTrait
 
     public function __toString()
     {
-        return isset($this->code) ? $this->code : get_class($this);
+        return $this->code ?? $this::class;
     }
 
     // can't do this, because it's in XmlLabelTrait

@@ -3,7 +3,7 @@
 namespace Survos\Providence\XmlModel;
 
 
-class ProfileRelationshipTableType implements XmlLabelsInterface
+class ProfileRelationshipTableType implements XmlLabelsInterface, \Stringable
 {
     use XmlAttributesTrait;
     use XmlLabelsTrait;

@@ -32,6 +32,8 @@
         }
     },
     "require-dev": {
-        "phpstan/phpstan": "^1.8"
+        "phpdocumentor/reflection-docblock": "*",
+        "phpstan/phpstan": "^1.8",
+        "rector/rector": "^0.13"
     }
 }

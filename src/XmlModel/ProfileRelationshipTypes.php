@@ -3,7 +3,7 @@
 namespace Survos\Providence\XmlModel;
 
 
-class ProfileRelationshipTypes
+class ProfileRelationshipTypes implements \Stringable
 {
     use XmlAttributesTrait;
     /** @var ProfileRelationshipTable[] */

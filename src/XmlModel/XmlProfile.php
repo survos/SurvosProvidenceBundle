@@ -2,10 +2,13 @@
 
 namespace Survos\Providence\XmlModel;
 
+use Symfony\Component\Serializer\Annotation\Groups;
+
 class XmlProfile
 {
     use XmlAttributesTrait;
 
+    #[Groups('profile')]
     public $profileName;
     private string $profileId;
 
@@ -18,12 +21,12 @@ class XmlProfile
     public ProfileElementSets $elementSets;
     public ?ProfileUserInterfaces $userInterfaces = null;
     public ?ProfileRelationshipTable $relationshipTable = null;
-    public ?ProfileRelationshipTypes $relationshipTypes;
+    public ?ProfileRelationshipTypes $relationshipTypes = null;
     public ?ProfileDisplays $displays = null;
     public $searchForms;
     public $logins;
     public $roles;
-    private string $filename;
+    private readonly string $filename;
     private string $xml;
 
     private int $mdeCount;
@@ -40,81 +43,52 @@ class XmlProfile
     }
 
     /**
-     * @param mixed $infoUrl
      * @return XmlProfile
      */
-    public function setInfoUrl($infoUrl)
+    public function setInfoUrl(mixed $infoUrl)
     {
         $this->infoUrl = $infoUrl;
         return $this;
     }
 
-    /**
-     * @return int
-     */
     public function getMdeCount(): int
     {
         return $this->mdeCount;
     }
 
-    /**
-     * @param int $mdeCount
-     * @return XmlProfile
-     */
     public function setMdeCount(int $mdeCount): XmlProfile
     {
         $this->mdeCount = $mdeCount;
         return $this;
     }
 
-    /**
-     * @return int
-     */
     public function getUiCount(): int
     {
         return $this->uiCount;
     }
 
-    /**
-     * @param int $uiCount
-     * @return XmlProfile
-     */
     public function setUiCount(int $uiCount): XmlProfile
     {
         $this->uiCount = $uiCount;
         return $this;
     }
 
-    /**
-     * @return int
-     */
     public function getListCount(): int
     {
         return $this->listCount;
     }
 
-    /**
-     * @param int $listCount
-     * @return XmlProfile
-     */
     public function setListCount(int $listCount): XmlProfile
     {
         $this->listCount = $listCount;
         return $this;
     }
 
-    /**
-     * @return int
-     */
     public function getDisplayCount(): int
     {
         return $this->displayCount;
     }
 
-    /**
-     * @param int $displayCount
-     * @return XmlProfile
-     */
     public function setDisplayCount(int $displayCount): XmlProfile
     {
         $this->displayCount = $displayCount;
@@ -122,18 +96,11 @@ class XmlProfile
     }
 
 
-    /**
-     * @return string
-     */
     public function getXml(): string
     {
         return $this->xml;
     }
 
-    /**
-     * @param string $xml
-     * @return XmlProfile
-     */
     public function setXml(string $xml): XmlProfile
     {
         $this->xml = $xml;
@@ -142,22 +109,22 @@ class XmlProfile
 
     public $metadataAlerts;
 
-    /** @returns ProfileList[] */
+    /** @return ProfileList[] */
     public function getLists(): array { return $this->lists->list; }
 
-    /** @returns ProfileMetaDataElement[] */
+    /** @return ProfileMetaDataElement[] */
     public function getElements(): array { return $this->elementSets->metadataElement; }
 
-    /** @returns ProfileDisplay[] */
+    /** @return ProfileDisplay[] */
     public function getDisplays(): array { return $this->displays ? $this->displays->display : []; }
 
-    /** @returns ProfileUserInterface[] */
+    /** @return ProfileUserInterface[] */
     public function getUserInterfaces(): array { return $this->userInterfaces ? $this->userInterfaces->userInterface: []; }
 
-    /** @returns ProfileRelationshipTable[] */
+    /** @return ProfileRelationshipTable[] */
     public function getRelationshipTypes(): array { return $this->relationshipTypes ? $this->relationshipTypes->relationshipTable: []; }
 
-    /** @returns int */
+    /** @return int */
     public function getRelationshipTypesCount(): int { return $this->relationshipTypes ? count($this->relationshipTypes->relationshipTable): 0; }
 
     public function ElementsByRestriction(): array {
@@ -171,7 +138,7 @@ class XmlProfile
         return $summary;
     }
 
-    /** @returns ProfileElementSets[] */
+    /** @return ProfileElementSets[] */
     public function getElementSets(): array { return $this->elementSets ? $this->elementSets->metadataElement: []; }
 
 //<relationshipTypes>
@@ -179,17 +146,17 @@ class XmlProfile
 //<types>
 //<type code="assessor" default="1">
 
-//    /** @returns ProfileRelationshipTable */
+//    /** @return ProfileRelationshipTable */
 //    public function getRelationshipTable(): ?ProfileRelationshipTable  { return $this->relationshipTable ? $this->relationshipTypes->relationshipTable: null; }
 
-    /** @returns ProfileRelationshipTableType[] */
+    /** @return ProfileRelationshipTableType[] */
     public function getRelationshipTables(): array  {
         return $this->relationshipTypes ? $this->relationshipTypes->relationshipTable: []; }
 
     public function getRelationshipTableByCode($code): ProfileRelationshipTable  {
         return current(array_filter($this->getRelationshipTables(), fn(ProfileRelationshipTable $table) => $table->name === $code)); }
 
-    /** @returns ProfileMetaDataElement[] */
+    /** @return ProfileMetaDataElement[] */
     public function getElementsByCode(): array {
         static $mdes;
         if (empty($mdes)) {
@@ -216,7 +183,7 @@ class XmlProfile
     }
 
     public function getElementByCode($code) {
-        $code = strtolower(str_replace('ca_attribute_', '', $code));
+        $code = strtolower(str_replace('ca_attribute_', '', (string) $code));
         return $this->getElementsByCode()[$code] ?? null;
     }
 
@@ -256,13 +223,13 @@ class XmlProfile
         return $this->profileName;
     }
 
-    /** @returns ProfileLocale[] */
+    /** @return ProfileLocale[] */
     public function getLocales(): array
     {
         return isset($this->locales) ? $this->locales->locale: [];
     }
 
-    public function getTranslationFilename($locale)
+    public function getTranslationFilename($locale): string
     {
         return sprintf('/translations/%s+intl-icu.%s.yaml', $this->getProfileId(), $locale);
     }

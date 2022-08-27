@@ -25,7 +25,7 @@ class ProfileRestrictions
     }
     public function getCode()
     {
-        return isset($this->code) ? $this->code : 'T.' . $this->table;
+        return $this->code ?? 'T.' . $this->table;
     }
 
 }

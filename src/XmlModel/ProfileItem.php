@@ -19,7 +19,7 @@ class ProfileItem implements XmlLabelsInterface
         return $this->items ? $this->items->item: [];
     }
 
-    public function _t(ProfileList $list)
+    public function _t(ProfileList $list): string
     {
         return sprintf("%s.%s.%s", 'items', $list->code, $this->idno);
     }

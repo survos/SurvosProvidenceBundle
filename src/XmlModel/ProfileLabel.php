@@ -4,7 +4,7 @@ namespace Survos\Providence\XmlModel;
 
 use Symfony\Component\String\Slugger\AsciiSlugger;
 
-class ProfileLabel
+class ProfileLabel implements \Stringable
 {
     use XmlAttributesTrait;
 
@@ -39,8 +39,8 @@ class ProfileLabel
         return $slugger->slug($this->getName())->ascii()->toString();
     }
 
-    public function __toString()
+    public function __toString(): string
     {
-        return $this->getName() ?: '(empty)'; // json_encode($this); // '??'; // $this->getCode();
+        return (string) ($this->getName() ?: '(empty)'); // json_encode($this); // '??'; // $this->getCode();
     }
 }

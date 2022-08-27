@@ -58,6 +58,7 @@ class SurvosProvidenceBundle extends AbstractBundle
         ;
         $definition->setArgument('$xmlDir', $config['xml_dir']);
         $definition->setArgument('$loadFromFiles', $config['load_from_files']);
+        $definition->setArgument('$persist', $config['persist']);
         $definition->setArgument('$confPath', $config['conf_path']);
         $definition->setArgument('$docPath', $config['doc_path']);
         $definition->setArgument('$fieldConfigPath', $config['field_config_path']);
@@ -81,6 +82,7 @@ class SurvosProvidenceBundle extends AbstractBundle
 //file_put_contents($fn = dirname(__DIR__) . '/../survos/ca/ca-fix/config/ca_models.json', json_encode(BaseModel::$s_ca_models_definitions, JSON_PRETTY_PRINT)) && dd($fn);
 
             ->booleanNode('load_from_files')->defaultValue(true)->end()
+            ->booleanNode('persist')->defaultValue(true)->end()
             ->end();
         ;
     }

@@ -3,7 +3,7 @@
 namespace Survos\Providence\XmlModel;
 
 
-class ProfileRelationshipTable
+class ProfileRelationshipTable implements \Stringable
 {
     use XmlAttributesTrait;
 
@@ -11,14 +11,14 @@ class ProfileRelationshipTable
     public $name;
     public string $code;
 
-    public function __toString() {
-        return $this->name;
+    public function __toString(): string {
+        return (string) $this->name;
     }
 
     /** @return ProfileRelationshipTypes[] */
     public function getTypes() { return $this->types->type; }
 
-    public function _label() { return sprintf("%s.%s", 'rel', $this->name); }
+    public function _label(): string { return sprintf("%s.%s", 'rel', $this->name); }
 
     public function findByCode($code): array
     {
@@ -26,8 +26,8 @@ class ProfileRelationshipTable
         return array_filter($this->types, fn(ProfileRelationshipTableType $e) => $e->code === $code);
     }
 
-    public function left() { preg_match('/ca_(.*?)_x_(.*?)$/', $this->name, $m); return $m[1]; }
-    public function right() { preg_match('/ca_(.*?)_x_(.*?)$/', $this->name, $m); return $m[2]; }
+    public function left() { preg_match('/ca_(.*?)_x_(.*?)$/', (string) $this->name, $m); return $m[1]; }
+    public function right() { preg_match('/ca_(.*?)_x_(.*?)$/', (string) $this->name, $m); return $m[2]; }
 
 //    public function getCode() { return $this->code; }
 

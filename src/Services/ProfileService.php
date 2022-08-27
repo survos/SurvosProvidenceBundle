@@ -200,6 +200,7 @@ class ProfileService
         private string                          $docPath,
         private string                          $fieldConfigPath,
         private bool                            $loadFromFiles,
+        private bool                            $persist,
         private readonly ValidatorInterface     $validator,
         private readonly ParameterBagInterface  $bag,
         private readonly LoggerInterface        $logger,
@@ -925,7 +926,9 @@ XML_WRAP;
                 $errors = $this->validator->validate($relatedEntity);
                 assert($errors->count() == 0, "Invalid entity " . $value);
 
-//                $this->entityManager->persist($relatedEntity); @todo: move to callback or complete out of this bundle
+                if ($this->persist) {
+                    $this->entityManager->persist($relatedEntity); // @todo: move to callback or complete out of this bundle
+                }
                 $related[$prefix][$idx] = $relatedEntity;
             }
         }
@@ -1259,7 +1262,7 @@ END;
     }
 
 
-    /** @returns XmlProfile[] */
+    /** @return XmlProfile[] */
     public function getXmlProfiles(?string $filename = null, bool $load = true): iterable
     {
         $profiles = [];

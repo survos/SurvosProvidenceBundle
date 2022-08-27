@@ -24,7 +24,7 @@ class ProfileMetaDataElement implements XmlLabelsInterface
     public function getSettings() { return $this->settings->setting; }
     public function getElements() { return $this->elements->metadataElement; }
 
-    /** @returns ProfileTypeRestrictions[] */
+    /** @return ProfileTypeRestrictions[] */
     public function getTypeRestrictions(): array {
         return $this->typeRestrictions->restriction;
 //        return $this->typeRestrictions ? $this->typeRestrictions->restriction: [];
