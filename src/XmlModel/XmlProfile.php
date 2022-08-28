@@ -10,15 +10,21 @@ class XmlProfile
 
     #[Groups('profile')]
     public $profileName;
+    #[Groups('profile')]
     private string $profileId;
 
+    #[Groups('profile')]
     public $profileDescription;
     public ProfileLists $lists;
+    #[Groups('profile')]
     public ProfileLocales $locales;
     public $useForConfiguration;
+    #[Groups('profile')]
     public $infoUrl;
     public $base;
+    #[Groups('sets')]
     public ProfileElementSets $elementSets;
+    #[Groups('ui')]
     public ?ProfileUserInterfaces $userInterfaces = null;
     public ?ProfileRelationshipTable $relationshipTable = null;
     public ?ProfileRelationshipTypes $relationshipTypes = null;
@@ -232,6 +238,10 @@ class XmlProfile
     public function getTranslationFilename($locale): string
     {
         return sprintf('/translations/%s+intl-icu.%s.yaml', $this->getProfileId(), $locale);
+    }
+
+    public function getDescription(): ?string {
+        return $this->profileDescription;
     }
 
 }

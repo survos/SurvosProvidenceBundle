@@ -43,6 +43,7 @@ use Symfony\Component\Finder\SplFileInfo;
 // for class reflection
 
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Translation\MessageCatalogue;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Yaml\Yaml;
@@ -201,6 +202,7 @@ class ProfileService
         private string                          $fieldConfigPath,
         private bool                            $loadFromFiles,
         private bool                            $persist,
+        private readonly NormalizerInterface    $normalizer,
         private readonly ValidatorInterface     $validator,
         private readonly ParameterBagInterface  $bag,
         private readonly LoggerInterface        $logger,
@@ -230,6 +232,7 @@ class ProfileService
 
     public function setup($fromFiles = false)
     {
+        $this->logger->warning("loading cores...");
         $this->coreTypes = $this->loadCoreTypes($fromFiles);
         $this->setupSystemLists();
         $this->addRelatedFields();
@@ -875,6 +878,17 @@ XML_WRAP;
         return $this->getCoreTypes()->filter(fn(Core $core) => $core->getCategoryCode() === $categoryCode);
     }
 
+    public function asYaml(XmlProfile $xmlProfile): string
+    {
+        // goal:
+        $data = $this->normalizer->normalize($xmlProfile, 'array',  ['groups' => ['profile', 'ui', 'attributes','labels']]);
+
+
+        $yaml = Yaml::dump($data, 3, 3);
+        return $yaml;
+
+    }
+
     // we could also load from classes, using the attributes.
     // fixtures only!
     public function loadCoreTypesFromFiles(): ArrayCollection
@@ -927,7 +941,7 @@ XML_WRAP;
                 assert($errors->count() == 0, "Invalid entity " . $value);
 
                 if ($this->persist) {
-                    $this->entityManager->persist($relatedEntity); // @todo: move to callback or complete out of this bundle
+//                    $this->entityManager->persist($relatedEntity); // @todo: move to callback or complete out of this bundle
                 }
                 $related[$prefix][$idx] = $relatedEntity;
             }

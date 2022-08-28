@@ -4,6 +4,7 @@ namespace Survos\Providence\XmlModel;
 
 use Survos\Providence\Repository\ProfileUserInterfaceRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 class ProfileUserInterface implements XmlLabelsInterface
 {
@@ -14,6 +15,7 @@ class ProfileUserInterface implements XmlLabelsInterface
 
     public $type;
 
+    #[Groups(['ui'])]
     public ProfileScreens $screens;
 
     /** @return ProfileScreen[] */

@@ -3,6 +3,8 @@
 namespace Survos\Providence\XmlModel;
 
 
+use Symfony\Component\Serializer\Annotation\Groups;
+
 trait XmlAttributesTrait
 {
     private $attributes;
@@ -28,6 +30,7 @@ trait XmlAttributesTrait
 //        dd($this, $attributes);
     }
 
+    #[Groups(['attributes'])]
     public function getAttributes()
     {
         return $this->attributes;

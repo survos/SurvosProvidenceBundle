@@ -2,6 +2,8 @@
 
 namespace Survos\Providence\XmlModel;
 
+use Symfony\Component\Serializer\Annotation\Groups;
+
 class ProfileScreen implements XmlLabelsInterface
 {
     use XmlAttributesTrait;
@@ -25,7 +27,9 @@ class ProfileScreen implements XmlLabelsInterface
 
     public function _label(): string { return sprintf("%s.%s", 'screen', $this->getCode()); }
 
+    #[Groups(['ui'])]
     public function getPlacements() { return $this->bundlePlacements->placement; }
+    #[Groups(['ui'])]
     public function getBundles(): array {
         return $this->bundles;
     }

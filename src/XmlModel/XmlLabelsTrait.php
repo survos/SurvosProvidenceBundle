@@ -3,9 +3,12 @@
 namespace Survos\Providence\XmlModel;
 
 
+use Symfony\Component\Serializer\Annotation\Groups;
+
 trait XmlLabelsTrait
 {
     public ProfileLabels $labels;
+    #[Groups(['labels'])]
     public function getLabels() { return $this->labels->label; }
 
     public function _label(): string { return sprintf("%s.%s", 'label', $this->getCode()); }
@@ -16,6 +19,7 @@ trait XmlLabelsTrait
 
     private bool $hasDescription = false;
     // override if idno or something else.
+    #[Groups(['profile'])]
     public function getCode()
     {
         return $this->code;
