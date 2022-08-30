@@ -2,16 +2,14 @@
 
 namespace Survos\Providence\Model;
 
-use App\Repository\CoreRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Survos\BaseBundle\Entity\SurvosBaseEntity;
 use Survos\CoreBundle\Entity\RouteParametersInterface;
 use Survos\CoreBundle\Entity\RouteParametersTrait;
 use function Symfony\Component\String\u;
 
-#[ORM\Entity(repositoryClass: CoreRepository::class)]
+# [ORM\Entity(repositoryClass: CoreRepository::class)]
 class Core implements RouteParametersInterface, \Stringable
 {
     use RouteParametersTrait;
@@ -19,7 +17,7 @@ class Core implements RouteParametersInterface, \Stringable
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
     private $id;
-    #[ORM\Column(type: 'string', length: 255)]
+    # [ORM\Column(type: 'string', length: 255)]
     private $caTable;
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private $labelTypesListCode;
@@ -35,9 +33,9 @@ class Core implements RouteParametersInterface, \Stringable
     private $typesListDescription;
     #[ORM\Column(type: 'json', options: ['jsonb' => true], nullable: true)]
     private $relationships = [];
-    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+//    #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private $singular;
-    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+//    #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private $plural;
     #[ORM\Column(type: 'text', nullable: true)]
     private $entityCode;
@@ -502,7 +500,7 @@ class Core implements RouteParametersInterface, \Stringable
     }
     public function getCode()
     {
-        return u($this->getEntityName())->snake();
+        return u($this->getEntityName())->snake()->toString();
     }
     public function getTraitCode(): ?string
     {

@@ -2,16 +2,22 @@
 
 namespace Survos\Providence\XmlModel;
 
+use Symfony\Component\Serializer\Annotation\Groups;
+
 class ProfileItem implements XmlLabelsInterface
 {
     use XmlAttributesTrait;
     use XmlLabelsTrait;
 
+    #[Groups(['lists'])]
     public $idno;
+    #[Groups(['lists'])]
     public $enabled;
+    #[Groups(['lists'])]
     public $default;
 //    public array $items = [];
     public ProfileSettings $settings;
+    #[Groups(['lists'])]
     public ?ProfileItems $items=null;
 
     public function getItems(): ?array

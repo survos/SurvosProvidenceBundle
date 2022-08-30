@@ -19,7 +19,9 @@
         "symfony/http-kernel": "^6.1",
         "symfony/string": "^6.1",
         "symfony/validator": "^6.1",
-        "twig/twig": "^3.4"
+        "twig/twig": "^3.4",
+        "symfony/yaml": "^6.1",
+        "symfony/serializer": "^6.1"
     },
     "autoload": {
         "psr-4": {

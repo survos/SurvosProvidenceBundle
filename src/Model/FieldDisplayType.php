@@ -29,7 +29,7 @@ class FieldDisplayType implements \Stringable
         $this->code = $code;
         return $this;
     }
-    #[ORM\OneToMany(targetEntity: Field::class, mappedBy: 'fieldDisplayType', orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'fieldDisplayType', targetEntity: Field::class, orphanRemoval: true)]
     private $fields;
     #[ORM\Column(type: 'string', length: 255)]
     private $name;

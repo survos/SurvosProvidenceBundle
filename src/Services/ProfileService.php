@@ -145,6 +145,7 @@ class ProfileService
         'entities', 'org', 'person', 'lists',
         'places', 'occurrences', 'storage_locations',
         'entities',
+
 //        'vocabulary_terms',
 
         'collections',
@@ -546,7 +547,10 @@ XML_WRAP;
         return $this->getSystemLists()[$code];
     }
 
-    public function getSystemLists()
+    /*
+     * @return SystemList[]
+     */
+    public function getSystemLists(): array
     {
         static $systemLists = null;
         // since this is linked from ca2, which doesn't have this entity.
@@ -881,12 +885,14 @@ XML_WRAP;
     public function asYaml(XmlProfile $xmlProfile): string
     {
         // goal:
-        $data = $this->normalizer->normalize($xmlProfile, 'array',  ['groups' => ['profile', 'ui', 'attributes','labels']]);
+        $data = $this->normalizer->normalize($xmlProfile, 'array',
+            ['groups' => ['profile', 'ui', 'lists', 'relationship', 'rt', 'attributes',
+//                'labels'
+            ]]);
 
 
-        $yaml = Yaml::dump($data, 3, 3);
+        $yaml = Yaml::dump($data, 5, 3, Yaml::DUMP_OBJECT);
         return $yaml;
-
     }
 
     // we could also load from classes, using the attributes.

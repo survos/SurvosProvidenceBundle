@@ -2,12 +2,15 @@
 
 namespace Survos\Providence\XmlModel;
 
+use Symfony\Component\Serializer\Annotation\Groups;
+
 class ProfileLists
 {
     use XmlAttributesTrait;
     use XmlLabelsTrait;
 
     /** @var ProfileList[] */
+    #[Groups(['lists'])]
     public $list = [];
 //    /** @var ProfileLabels[] */
 //    public $labels = [];

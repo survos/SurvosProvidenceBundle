@@ -15,6 +15,7 @@ class XmlProfile
 
     #[Groups('profile')]
     public $profileDescription;
+    #[Groups('profile')]
     public ProfileLists $lists;
     #[Groups('profile')]
     public ProfileLocales $locales;
@@ -26,8 +27,11 @@ class XmlProfile
     public ProfileElementSets $elementSets;
     #[Groups('ui')]
     public ?ProfileUserInterfaces $userInterfaces = null;
+    #[Groups('profile')]
     public ?ProfileRelationshipTable $relationshipTable = null;
+    #[Groups('profile')]
     public ?ProfileRelationshipTypes $relationshipTypes = null;
+    #[Groups('profile')]
     public ?ProfileDisplays $displays = null;
     public $searchForms;
     public $logins;

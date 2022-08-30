@@ -3,10 +3,13 @@
 namespace Survos\Providence\XmlModel;
 
 
+use Symfony\Component\Serializer\Annotation\Groups;
+
 class ProfileRelationshipTypes implements \Stringable
 {
     use XmlAttributesTrait;
     /** @var ProfileRelationshipTable[] */
+    #[Groups('relationship')]
     public $relationshipTable = [];
 
 
