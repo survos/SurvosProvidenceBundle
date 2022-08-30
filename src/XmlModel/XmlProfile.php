@@ -159,7 +159,7 @@ class XmlProfile
 //    /** @return ProfileRelationshipTable */
 //    public function getRelationshipTable(): ?ProfileRelationshipTable  { return $this->relationshipTable ? $this->relationshipTypes->relationshipTable: null; }
 
-    /** @return ProfileRelationshipTableType[] */
+    /** @return array|ProfileRelationshipTable[] */
     public function getRelationshipTables(): array  {
         return $this->relationshipTypes ? $this->relationshipTypes->relationshipTable: []; }
 

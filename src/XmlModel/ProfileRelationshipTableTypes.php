@@ -13,8 +13,46 @@ class ProfileRelationshipTableTypes
     /** @var ProfileRelationshipTypes[] */
     #[Groups('relationship')]
     public $type = [];
-    public string $subTypeLeft;
-    public string $subTypeRight;
+    #[Groups('relationship')]
+    public ?string $subTypeLeft=null;
+    #[Groups('relationship')]
+    public ?string $subTypeRight=null;
+
+    /**
+     * @return string|null
+     */
+    public function getSubTypeLeft(): ?string
+    {
+        return $this->subTypeLeft;
+    }
+
+    /**
+     * @param string|null $subTypeLeft
+     * @return ProfileRelationshipTableTypes
+     */
+    public function setSubTypeLeft(?string $subTypeLeft): ProfileRelationshipTableTypes
+    {
+        $this->subTypeLeft = $subTypeLeft;
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getSubTypeRight(): ?string
+    {
+        return $this->subTypeRight;
+    }
+
+    /**
+     * @param string|null $subTypeRight
+     * @return ProfileRelationshipTableTypes
+     */
+    public function setSubTypeRight(?string $subTypeRight): ProfileRelationshipTableTypes
+    {
+        $this->subTypeRight = $subTypeRight;
+        return $this;
+    }
 
 
 

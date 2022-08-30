@@ -15,7 +15,7 @@ class ProfileRelationshipTable implements \Stringable
         return (string) $this->name;
     }
 
-    /** @return ProfileRelationshipTypes[] */
+    /** @return ProfileRelationshipTableType[] */
     public function getTypes() { return $this->types->type; }
 
     public function _label(): string { return sprintf("%s.%s", 'rel', $this->name); }
