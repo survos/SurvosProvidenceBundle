@@ -30,7 +30,7 @@ trait XmlAttributesTrait
 //        dd($this, $attributes);
     }
 
-    #[Groups(['attributes'])]
+//    #[Groups(['attributes'])]
     public function getAttributes()
     {
         return $this->attributes;

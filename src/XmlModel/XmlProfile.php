@@ -16,7 +16,7 @@ class XmlProfile
     #[Groups('profile')]
     public $profileDescription;
     #[Groups('profile')]
-    public ProfileLists $lists;
+    public ?ProfileLists $lists=null;
     #[Groups('profile')]
     public ProfileLocales $locales;
     public $useForConfiguration;
@@ -24,7 +24,7 @@ class XmlProfile
     public $infoUrl;
     public $base;
     #[Groups('sets')]
-    public ProfileElementSets $elementSets;
+    public ?ProfileElementSets $elementSets = null;
     #[Groups('ui')]
     public ?ProfileUserInterfaces $userInterfaces = null;
     #[Groups('profile')]
@@ -120,10 +120,10 @@ class XmlProfile
     public $metadataAlerts;
 
     /** @return ProfileList[] */
-    public function getLists(): array { return $this->lists->list; }
+    public function getLists(): array { return $this->lists?->list ?: []; }
 
     /** @return ProfileMetaDataElement[] */
-    public function getElements(): array { return $this->elementSets->metadataElement; }
+    public function getElements(): array { return $this->elementSets?->metadataElement ?: []; }
 
     /** @return ProfileDisplay[] */
     public function getDisplays(): array { return $this->displays ? $this->displays->display : []; }

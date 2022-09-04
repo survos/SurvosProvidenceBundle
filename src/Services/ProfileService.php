@@ -891,7 +891,18 @@ XML_WRAP;
             ]]);
 
 
+//        $retArray =array_filter($array, fn($array) =>
+//            if(!empty($array)) {
+//                array_filter($array);
+//            }
+//        );
+//
+//        dump($data, $retArray);
+//        array_walk_recursive($data, fn($a, $b) => dd($a, $b, func_get_args()));
+
+        // https://stackoverflow.com/questions/7696548/php-how-to-remove-empty-entries-of-an-array-recursively
         $yaml = Yaml::dump($data, 5, 3, Yaml::DUMP_OBJECT);
+        dd($yaml);
         return $yaml;
     }
 
@@ -1265,7 +1276,11 @@ END;
 
     public function getXmlProfile(string $profileId, bool $load = false): XmlProfile
     {
-        $filename = $this->xmlDir . "/$profileId.xml";
+        if (!file_exists($profileId)) {
+            $filename = $this->xmlDir . "/$profileId.xml";
+        } else {
+            $filename = $profileId;
+        }
         assert(file_exists($filename), "Missing $filename");
 //        $profile->profileId = $profileId;
         if ($load) {
