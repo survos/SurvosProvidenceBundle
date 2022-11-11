@@ -210,9 +210,11 @@ class ProfileService
         private readonly Environment            $twig,
         private readonly EntityManagerInterface $entityManager)
     {
+
         $this->coreTypes = new ArrayCollection();
 
         $this->relationshipTables = [];
+        return; // do we really need this?
         if ($this->loadFromFiles) {
             $this->setup(true);
         }
@@ -910,12 +912,14 @@ XML_WRAP;
     // fixtures only!
     public function loadCoreTypesFromFiles(): ArrayCollection
     {
+
 //        if (!class_exists('App\\Entity\\Core', false)) {
 //            return new ArrayCollection();
 //        }
 
 //        $baseData = $this->getFieldData(true);
         $coreTypes = new ArrayCollection();
+        return $coreTypes;
 
         $systemLists = $this->getSystemLists();
 
