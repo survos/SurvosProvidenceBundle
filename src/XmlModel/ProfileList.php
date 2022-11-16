@@ -17,6 +17,9 @@ class ProfileList implements XmlLabelsInterface, \Stringable
 
     public ?ProfileItems $items=null;
 
+    /**
+     * @return array|ProfileItem[]
+     */
     #[Groups(['lists'])]
     public function getItems(): ?array
     {
