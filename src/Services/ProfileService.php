@@ -494,7 +494,7 @@ XML_WRAP;
         $map = $this->getMapping()['systemLists'][str_replace('ca_', '', $sysList->getCode())];
 //        dd($map);
         // the name of this now needs to map to a new entity type, same fields as NestedListItems
-        $repoFilename = "/src/Repository/${entityName}Repository.php";
+        $repoFilename = "/src/Repository/{$entityName}Repository.php";
 
         $repoCode = $this->twig->render("php/repo.php.twig", [
             'filename' => $repoFilename,
