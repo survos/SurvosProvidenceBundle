@@ -16,7 +16,7 @@ class ProfileDisplay
 
     // in the <display> element, type restrictions are a comma-delimited attribute, not an element.
 //    public ProfileTypeRestrictions $typeRestrictions;
-    public string $typeRestrictions;
+    public string|ProfileTypeRestrictions $typeRestrictions;
     public ProfileGroupAccess $groupAccess;
 
     public ProfileSettings $settings;

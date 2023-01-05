@@ -13,7 +13,7 @@ class ProfileUserInterface implements XmlLabelsInterface
 
     final public const LABEL_PREFIX = 'ui';
 
-    public $type;
+    public $type = [];
 
     #[Groups(['ui'])]
     public ProfileScreens $screens;

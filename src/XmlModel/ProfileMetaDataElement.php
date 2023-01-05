@@ -11,7 +11,7 @@ class ProfileMetaDataElement implements XmlLabelsInterface
     public string $datatype;
     public ?string $documentationUrl=null;
     public ProfileSettings $settings;
-    public ProfileTypeRestrictions $typeRestrictions;
+    public string|ProfileTypeRestrictions $typeRestrictions;
     public ProfileElements $elements;
     public $metadataElement = [];
 

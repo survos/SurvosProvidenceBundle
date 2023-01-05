@@ -9,6 +9,31 @@ trait XmlAttributesTrait
 {
     private $attributes;
     public string $code; // or protected?
+    public $v;
+    public $default;
+    public string|ProfileTypeRestrictions $typeRestrictions;
+    public $typeRestrictionRight;
+    public $includeSubtypes;
+    public $includeSubtypesRight;
+    public $includeSubtypesLeft;
+    public $typeRestrictionLeft;
+
+    public $lang;
+    public $dontUseForCataloguing;
+    public $country;
+    public $preferred;
+    public $value;
+    public $rank;
+    public $defaultSort;
+    public $type = [];
+
+    public $list = [];
+    public $color;
+    public $system;
+    public $user;
+    public $access;
+    public $filepath;
+    public $infoUrl;
 
     public function setAttributes(array $attributes)
     {
@@ -17,6 +42,9 @@ trait XmlAttributesTrait
 //            dump($attributes, $var, $val, $this->{$var});
 
             try {
+                if (str_contains($var, 'http:')) {
+                    continue;
+                }
                 $this->{$var} = $val;
             } catch (\TypeError $error) {
                 dd($error, $var, $val);
