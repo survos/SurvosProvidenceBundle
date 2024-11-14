@@ -3,7 +3,7 @@
 namespace Survos\Providence\XmlModel;
 
 
-use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 trait XmlLabelsTrait
 {

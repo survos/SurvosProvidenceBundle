@@ -4,7 +4,7 @@ namespace Survos\Providence\XmlModel;
 
 use Survos\Providence\Repository\ProfileUserInterfaceRepository;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 class ProfileUserInterface implements XmlLabelsInterface
 {

@@ -2,7 +2,7 @@
 
 namespace Survos\Providence\XmlModel;
 
-use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\String\Slugger\AsciiSlugger;
 
 class ProfileLabel implements \Stringable
@@ -12,7 +12,7 @@ class ProfileLabel implements \Stringable
     #[Groups(['labels'])]
     public $locale;
     #[Groups(['labels'])]
-    public ?string $name = null;
+    public string|null $name = null;
     #[Groups(['labels'])]
     public $description;
     #[Groups(['labels'])]
